@@ -56,7 +56,9 @@ const parseFeedsAndNotify = async ({
 
 					const videoTitle = truncate(details.snippet.title, 70)
 					const channelName = details.snippet.channelTitle
-					const videoThumbnail = details.snippet.thumbnails.high.url
+					const { url: videoThumbnail } =
+						details.snippet.thumbnails.maxres ??
+						details.snippet.thumbnails.standard
 					const videoDuration = details.contentDetails.duration
 						.replace('PT', '')
 						.replace('S', '')
