@@ -2,13 +2,12 @@ const fs = require('pn/fs')
 const path = require('path')
 
 const { google } = require('googleapis')
-const nodemailer = require('nodemailer')
-const Handlebars = require('handlebars')
 const SQL = require('sql-template-strings')
 
 const config = require('../config.json')
 const database = require('./database')
 const authorize = require('./google/auth/')
+const mailer = require('./email')
 const { subscriptionIterator, channelVideoIterator } =
 	require('./google/iterators')
 
@@ -21,17 +20,7 @@ const main = async () => {
 
 		const db = await database.init(config.database)
 
-		const transporter = nodemailer.createTransport(config.email)
-
-
-		//
-		// HTML Template
-		//
-
-		const template = Handlebars.compile(await fs.readFile(
-			path.join(__dirname, './email/template.hbs'),
-			'utf-8',
-		))
+		const { transporter, emailTemplate } = mailer.init(config.email)
 
 		for await (let subscription of subscriptionIterator(service, auth)) {
 			const { resourceId: { channelId }, title: channelName } =
