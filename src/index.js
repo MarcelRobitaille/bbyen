@@ -18,7 +18,7 @@ const main = async () => {
 
 		const db = await database.init(config.database)
 
-		const { transporter, emailTemplate } = mailer.init(config.email)
+		const { transporter, emailTemplate } = await mailer.init(config.email)
 
 		setIntervalInstant(
 			updateSubscriptions,
