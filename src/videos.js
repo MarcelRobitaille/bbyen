@@ -24,7 +24,7 @@ const parseFeedsAndNotify = async ({
 		})
 
 		const channels = await db.all(SQL`
-			SELECT channelId FROM subscriptions;
+			SELECT channelId, channelThumbnail FROM subscriptions;
 		`)
 
 		for (let { channelId, channelThumbnail } of channels) {
