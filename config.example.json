@@ -1,0 +1,24 @@
+{
+	"email": {
+		"host": "smtp.example.com",
+		"port": 465,
+		"secure": true,
+		"auth": {
+			"user": "your-automated-email@example.com",
+			"pass": "your-automated-email-password"
+		},
+		"sendingContact": "\"BBYEN\" <your-automated-email@example.com>",
+		"destination": "your-personal-email@example.com"
+	},
+	"database": {
+		"filename": "database.sqlite"
+	},
+	"timers": {
+		"subscriptions": "3 days",
+		"videos": "6 hours"
+	},
+	"kickoff": {
+		"subscriptions": true,
+		"videos": true
+	}
+}
