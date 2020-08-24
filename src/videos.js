@@ -1,3 +1,4 @@
+const chalk = require('chalk')
 const SQL = require('sql-template-strings')
 const RSSParser = require('rss-parser')
 
@@ -10,6 +11,8 @@ const parseFeedsAndNotify = async ({
 	config,
 }) => {
 	try {
+
+		console.log(chalk.magenta('[videos]'), 'Checking for new videos...')
 
 		const parser = new RSSParser({
 			customFields: {
@@ -24,6 +27,11 @@ const parseFeedsAndNotify = async ({
 		`)
 
 		for (let { channelId, channelThumbnail } of channels) {
+
+			console.log(
+				chalk.magenta('[videos]'),
+				`Checking channel ${channelId}`,
+			)
 
 			const videosSent = new Set((await db.all(SQL`
 				SELECT videoId FROM videos WHERE channelId=${channelId};
@@ -51,6 +59,11 @@ const parseFeedsAndNotify = async ({
 					.replace('S', '')
 					.replace('M', ':')
 					.replace('H', ':')
+
+				console.log(
+					chalk.magenta('[videos]'),
+					`New video (${videoId}): ${videoTitle}`,
+				)
 
 				await db.run(SQL`
 					INSERT INTO videos (videoId, channelId)
