@@ -1,6 +1,7 @@
 const chalk = require('chalk')
-const SQL = require('sql-template-strings')
+const truncate = require('truncate')
 const RSSParser = require('rss-parser')
+const SQL = require('sql-template-strings')
 
 const parseFeedsAndNotify = async ({
 	db,
@@ -53,8 +54,8 @@ const parseFeedsAndNotify = async ({
 						id: videoId,
 					})).data.items[0]
 
-					const { title: videoTitle, channelTitle: channelName } =
-						details.snippet.title
+					const videoTitle = truncate(details.snippet.title, 70)
+					const channelName = details.snippet.channelTitle
 					const videoThumbnail = details.snippet.thumbnails.high.url
 					const videoDuration = details.contentDetails.duration
 						.replace('PT', '')
