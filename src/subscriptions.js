@@ -45,9 +45,9 @@ const updateSubscriptions = async ({ db, service, auth }) => {
 				VALUES (?, ?);
 			`)
 
-			await Promise.all(newSubscriptions.map(
-				channelId => stmt.run(channelId, channelThumbnails[channelId])
-			))
+			for (let channelId of newSubscriptions.values()) {
+				await stmt.run(channelId, channelThumbnails[channelId])
+			}
 			await stmt.finalize()
 		}
 
@@ -57,7 +57,9 @@ const updateSubscriptions = async ({ db, service, auth }) => {
 				DELETE FROM subscriptions WHERE channelId=?;
 			`)
 
-			await Promise.all(removedSubscriptions.map(stmt.run))
+			for (let channelId of removedSubscriptions.values()) {
+				await stmt.run(channelId)
+			}
 			await stmt.finalize()
 		}
 
