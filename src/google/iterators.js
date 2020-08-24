@@ -48,7 +48,7 @@ const subscriptionIterator = (service, auth) => _genericIterator(
 		auth,
 		part: 'snippet,contentDetails',
 		mine: true,
-		maxResults: 1,
+		maxResults: 50,
 	},
 )
 
@@ -75,7 +75,7 @@ const channelVideoIterator = (service, auth, channelId) => _genericIterator(
 		safeSearch: 'none',
 		type: 'video',
 		part: 'id,snippet,contentDetails',
-		maxResults: 1,
+		maxResults: 50,
 		publishedAfter: dateFns.sub(new Date(), DATE_THRESHOLD).toISOString(),
 	},
 )
