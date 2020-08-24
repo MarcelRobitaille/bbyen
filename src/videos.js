@@ -37,9 +37,10 @@ const parseFeedsAndNotify = async ({
 				SELECT videoId FROM videos WHERE channelId=${channelId};
 			`)).map(v => v.videoId))
 
-			const feed = await parser.parseURL(`
-				https://www.youtube.com/feeds/videos.xml?channel_id=${channelId}
-			`.trim())
+			const feed = await parser.parseURL([
+				'https://www.youtube.com/feeds/videos.xml',
+				'?channel_id=', channelId,
+			].join(''))
 
 			for (let { videoId } of feed.items) {
 				try {
