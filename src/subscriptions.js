@@ -28,11 +28,15 @@ const updateSubscriptions = async ({ db, service, auth }) => {
 		}
 
 		// Compute difference of both sets to determine new / removed subs
-		const newSubscriptions = new Set([...updatedSubscriptions])
-			.filter(sub => !savedSubscriptions.has(sub))
+		const newSubscriptions = new Set(
+			[...updatedSubscriptions]
+				.filter(sub => !savedSubscriptions.has(sub))
+		)
 
-		const removedSubscriptions = new Set([...savedSubscriptions])
-			.filter(sub => !updatedSubscriptions.has(sub))
+		const removedSubscriptions = new Set(
+			[...savedSubscriptions]
+				.filter(sub => !updatedSubscriptions.has(sub))
+		)
 
 		// Add any new subscriptions to the database
 		{
