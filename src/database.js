@@ -23,8 +23,15 @@ const init = async ({ filename }) => {
 		CREATE TABLE IF NOT EXISTS videos (
 			id INTEGER PRIMARY KEY AUTOINCREMENT,
 			videoId TEXT NOT NULL UNIQUE,
-			channelId TEXT NOT NULL,
-			settled BOOLEAN NOT NULL
+			channelId TEXT NOT NULL
+		);
+	`)
+
+	await db.exec(SQL`
+		CREATE TABLE IF NOT EXISTS subscriptions (
+			id INTEGER PRIMARY KEY AUTOINCREMENT,
+			channelId TEXT NOT NULL UNIQUE,
+			channelThumbnail TEXT NOT NULL
 		);
 	`)
 
