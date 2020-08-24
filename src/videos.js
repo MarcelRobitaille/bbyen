@@ -66,11 +66,6 @@ const parseFeedsAndNotify = async ({
 						`New video (${videoId}): ${videoTitle}`,
 					)
 
-					await db.run(SQL`
-						INSERT INTO videos (videoId, channelId)
-						VALUES (${videoId}, ${channelId});
-					`)
-
 					const info = await transporter.sendMail({
 						from: config.email.sendingContact,
 						to: config.email.destination,
@@ -89,6 +84,11 @@ const parseFeedsAndNotify = async ({
 							].join(''),
 						}),
 					})
+
+					await db.run(SQL`
+						INSERT INTO videos (videoId, channelId)
+						VALUES (${videoId}, ${channelId});
+					`)
 
 					console.log(info)
 
