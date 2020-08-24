@@ -69,6 +69,10 @@ const parseFeedsAndNotify = async ({
 						videoThumbnail,
 						videoTitle,
 						videoDuration,
+						videoURL: [
+							'https://www.youtube.com/attribution_link?u=/',
+							encodeURIComponent(`watch?v=${videoId}`),
+						].join(''),
 					}),
 				})
 
