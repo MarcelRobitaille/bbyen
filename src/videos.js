@@ -2,6 +2,22 @@ const chalk = require('chalk')
 const truncate = require('truncate')
 const RSSParser = require('rss-parser')
 const SQL = require('sql-template-strings')
+const { parse: parseDuration } = require('duration-fns')
+
+const formatDuration = ISO8601Duration => {
+	const duration = parseDuration(ISO8601Duration)
+
+	const hours = duration.hours === 0 ? '' : `${duration.hours}:`
+	const minutes = (duration.hours + duration.minutes) === 0 ? '' :
+		`${duration.hours > 0
+			?  String(duration.minutes).padStart(2, '0')
+			: duration.minutes}:`
+	const seconds = (duration.hours + duration.minutes) === 0
+		? duration.seconds
+		: String(duration.seconds).padStart(2, '0')
+
+	return [ hours, minutes, seconds ].join('')
+}
 
 const parseFeedsAndNotify = async ({
 	db,
@@ -59,11 +75,8 @@ const parseFeedsAndNotify = async ({
 					const { url: videoThumbnail } =
 						details.snippet.thumbnails.maxres ??
 						details.snippet.thumbnails.standard
-					const videoDuration = details.contentDetails.duration
-						.replace('PT', '')
-						.replace('S', '')
-						.replace('M', ':')
-						.replace('H', ':')
+					const videoDuration =
+						formatDuration(details.contentDetails.duration)
 
 					console.log(
 						chalk.magenta('[videos]'),
