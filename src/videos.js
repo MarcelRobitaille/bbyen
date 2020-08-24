@@ -71,7 +71,7 @@ const parseFeedsAndNotify = async ({
 					})).data.items[0]
 
 					const videoTitle = truncate(details.snippet.title, 70)
-					const channelName = details.snippet.channelTitle
+					const { channelTitle } = details.snippet
 					const { url: videoThumbnail } =
 						details.snippet.thumbnails.maxres ??
 						details.snippet.thumbnails.standard ??
@@ -87,10 +87,10 @@ const parseFeedsAndNotify = async ({
 					await transporter.sendMail({
 						from: config.email.sendingContact,
 						to: config.email.destination,
-						subject: `${channelName} just uploaded a video`,
+						subject: `${channelTitle} just uploaded a video`,
 						html: emailTemplate({
 							channelId,
-							channelName,
+							channelTitle,
 							channelThumbnail,
 							videoId,
 							videoThumbnail,
