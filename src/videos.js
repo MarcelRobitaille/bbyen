@@ -90,10 +90,6 @@ const parseFeedsAndNotify = async ({
 						VALUES (${videoId}, ${channelId});
 					`)
 
-					console.log(info)
-
-					break
-
 				} catch (err) {
 					console.error(err)
 				}
