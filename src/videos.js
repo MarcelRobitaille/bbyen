@@ -70,7 +70,7 @@ const parseFeedsAndNotify = async ({
 						`New video (${videoId}): ${videoTitle}`,
 					)
 
-					const info = await transporter.sendMail({
+					await transporter.sendMail({
 						from: config.email.sendingContact,
 						to: config.email.destination,
 						subject: `${channelName} just uploaded a video`,
