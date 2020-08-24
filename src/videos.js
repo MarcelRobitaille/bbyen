@@ -74,7 +74,8 @@ const parseFeedsAndNotify = async ({
 					const channelName = details.snippet.channelTitle
 					const { url: videoThumbnail } =
 						details.snippet.thumbnails.maxres ??
-						details.snippet.thumbnails.standard
+						details.snippet.thumbnails.standard ??
+						details.snippet.thumbnails.high
 					const videoDuration =
 						formatDuration(details.contentDetails.duration)
 
