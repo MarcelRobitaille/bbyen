@@ -17,6 +17,7 @@
     "@babel/core": "7.11.4",
     "@babel/node": "7.10.5",
     "@babel/preset-env": "7.11.0",
+    "chalk": "4.1.0",
     "date-fns": "2.15.0",
     "duration-fns": "2.0.1",
     "google-auth-library": "6.0.6",
