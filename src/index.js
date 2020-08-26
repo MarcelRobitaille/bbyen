@@ -29,7 +29,7 @@ const main = async () => {
 
 		setIntervalInstant(
 			parseFeedsAndNotify,
-			parseDuration(config.timers.subscriptions),
+			parseDuration(config.timers.videos),
 			config.kickoff.videos,
 			{ db, service, auth, transporter, emailTemplate, config },
 		)
