@@ -7,6 +7,11 @@ const { subscriptionIterator } = require('./google/iterators')
 const updateSubscriptions = async ({ db, service, auth }) => {
 	try {
 
+		console.log(
+			chalk.magenta('[subscriptions]'),
+			'Checking subscriptions...',
+		)
+
 		// Read all known subs from the database
 		const savedSubscriptions = new Set(
 			(await db.all(SQL`SELECT channelId FROM subscriptions;`))
@@ -77,6 +82,11 @@ const updateSubscriptions = async ({ db, service, auth }) => {
 			}
 			await stmt.finalize()
 		}
+
+		console.log(
+			chalk.magenta('[subscriptions]'),
+			'Done checking subscriptions...',
+		)
 
 	} catch (err) {
 
