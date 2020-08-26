@@ -123,6 +123,12 @@ const parseFeedsAndNotify = async ({
 				}
 			}
 		}
+
+
+		console.log(
+			chalk.magenta('[videos]'),
+			'Finished checking for new videos',
+		)
 	} catch (err) {
 		console.error(err)
 	}
