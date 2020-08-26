@@ -8,10 +8,8 @@ const formatDuration = ISO8601Duration => {
 	const duration = parseDuration(ISO8601Duration)
 
 	const hours = duration.hours === 0 ? '' : `${duration.hours}:`
-	const minutes = (duration.hours + duration.minutes) === 0 ? '' :
-		`${duration.hours > 0
-			?  String(duration.minutes).padStart(2, '0')
-			: duration.minutes}:`
+	const minutes = String(duration.minutes)
+		.padStart(duration.hours > 0 ? 2 : 0, '0') + ':'
 	const seconds = (duration.hours + duration.minutes) === 0
 		? duration.seconds
 		: String(duration.seconds).padStart(2, '0')
