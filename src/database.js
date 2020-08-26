@@ -31,7 +31,8 @@ const init = async ({ filename }) => {
 		CREATE TABLE IF NOT EXISTS subscriptions (
 			id INTEGER PRIMARY KEY AUTOINCREMENT,
 			channelId TEXT NOT NULL UNIQUE,
-			channelThumbnail TEXT NOT NULL
+			channelThumbnail TEXT NOT NULL,
+			channelTitle TEXT NOT NULL
 		);
 	`)
 

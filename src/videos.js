@@ -38,14 +38,14 @@ const parseFeedsAndNotify = async ({
 		})
 
 		const channels = await db.all(SQL`
-			SELECT channelId, channelThumbnail FROM subscriptions;
+			SELECT channelId, channelTitle, channelThumbnail FROM subscriptions;
 		`)
 
-		for (let { channelId, channelThumbnail } of channels) {
+		for (let { channelId, channelTitle, channelThumbnail } of channels) {
 
 			console.log(
 				chalk.magenta('[videos]'),
-				`Checking channel ${channelId}`,
+				`Checking channel ${channelTitle} (${channelId})`,
 			)
 
 			const videosSent = new Set((await db.all(SQL`
@@ -79,7 +79,8 @@ const parseFeedsAndNotify = async ({
 
 					console.log(
 						chalk.magenta('[videos]'),
-						`New video (${videoId}): ${videoTitle}`,
+						`New video from ${channelTitle} (id: ${videoId}):`,
+						videoTitle
 					)
 
 					await transporter.sendMail({

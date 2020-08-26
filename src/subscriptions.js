@@ -15,16 +15,20 @@ const updateSubscriptions = async ({ db, service, auth }) => {
 
 		// Get updated list of subs using Google api
 		const updatedSubscriptions = new Set()
-		const channelThumbnails = new Map()
+		const channelDetails = new Map()
 		for await (let sub of subscriptionIterator(service, auth)) {
 
 			// Skip subscriber if not signed up for notifications
 			if (sub.contentDetails.activityType !== 'all') continue
 
-			const { channelId } = sub.snippet.resourceId
+			const { resourceId: { channelId }, title }
+				= sub.snippet
 
 			updatedSubscriptions.add(channelId)
-			channelThumbnails[channelId] = sub.snippet.thumbnails.high.url
+			channelDetails[channelId] = {
+				title,
+				thumbnail: sub.snippet.thumbnails.high.url,
+			}
 		}
 
 		// Compute difference of both sets to determine new / removed subs
@@ -41,12 +45,23 @@ const updateSubscriptions = async ({ db, service, auth }) => {
 		// Add any new subscriptions to the database
 		{
 			const stmt = await db.prepare(SQL`
-				INSERT INTO subscriptions (channelId, channelThumbnail)
-				VALUES (?, ?);
+				INSERT INTO subscriptions (
+					channelId,
+					channelTitle,
+					channelThumbnail
+				)
+				VALUES (?, ?, ?);
 			`)
 
 			for (let channelId of newSubscriptions.values()) {
-				await stmt.run(channelId, channelThumbnails[channelId])
+				const { title, thumbnail } = channelDetails[channelId]
+
+				console.log(
+					chalk.magenta('[subscriptions]'),
+					`New subscription: ${title}`,
+				)
+
+				await stmt.run(channelId, title, thumbnail)
 			}
 			await stmt.finalize()
 		}
