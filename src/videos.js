@@ -109,6 +109,16 @@ const parseFeedsAndNotify = async ({
 					`)
 
 				} catch (err) {
+
+					if (err.code === 'EMESSAGE' && err.responseCode === 550) {
+						console.log(
+							chalk.red('[videos]'),
+							'Email quota has run out.',
+							'Abandoning, will retry on next timer trigger.',
+						)
+						return
+					}
+
 					console.error(err)
 				}
 			}
