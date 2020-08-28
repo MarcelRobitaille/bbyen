@@ -1,0 +1,15 @@
+[Unit]
+Description=YouTube email notification system
+
+[Service]
+User=1000
+Group=1000
+WorkingDirectory=/opt/bbyen/
+Environment="NODE_ENV=production"
+ExecStart=/opt/bbyen/start.sh
+IgnoreSIGPIPE=false
+KillMode=process
+
+[Install]
+WantedBy=multi-user.target
+
