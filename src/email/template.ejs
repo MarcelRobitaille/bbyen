@@ -2,8 +2,8 @@
 	<tbody>
 		<tr>
 			<td>
-				<a href="{{videoURL}}" width="600px">
-					<img src="{{videoThumbnail}}" width="600px" />
+				<a href="<%= videoURL %>" width="600px">
+					<img src="<%= videoThumbnail %>" width="600px" />
 				</a>
 			</td>
 		</tr>
@@ -27,8 +27,8 @@
 					<tbody>
 						<tr>
 							<td>
-								<a href="{{videoURL}}">
-									<img src="{{channelThumbnail}}" style="display:block;border-radius:50%" width="32" border="0">
+								<a href="<%= videoURL %>">
+									<img src="<%= channelThumbnail %>" style="display:block;border-radius:50%" width="32" border="0">
 								</a>
 							</td>
 
@@ -37,15 +37,15 @@
 									<tbody>
 										<tr>
 											<td>
-												<a href="{{videoURL}}" style="text-decoration: none;">
-													<span style="font-family: Roboto, sans-serif; font-size: 14px; color: #212121; line-height: 20px;">{{videoTitle}}</span>
+												<a href="<%= videoURL %>" style="text-decoration: none;">
+													<span style="font-family: Roboto, sans-serif; font-size: 14px; color: #212121; line-height: 20px;"><%= videoTitle %></span>
 												</a>
 											</td>
 										</tr>
 
 										<tr>
 											<td>
-												<a href="https://youtube.com/channel/{{channelId}}" style="font-family:Roboto,sans-serif;font-size:12px;color:#757575;line-height:16px;letter-spacing:0px;text-decoration:none">{{channelTitle}}</a>
+												<a href="https://youtube.com/channel/<%= channelId %>" style="font-family:Roboto,sans-serif;font-size:12px;color:#757575;line-height:16px;letter-spacing:0px;text-decoration:none"><%= channelTitle %></a>
 											</td>
 										</tr>
 									</tbody>
@@ -53,7 +53,7 @@
 							</td>
 
 							<td>
-								<div style="color: white;background-color: #212121;display: inline-block;padding: 4px;border-radius: 2px;font-family: arial,Arial,sans-serif;font-size: 12px;">{{videoDuration}}</div>
+								<div style="color: white;background-color: <%= videoWasLivestream ? '#ff0000' : '#212121' %>;display: inline-block;padding: 4px;border-radius: 2px;font-family: arial,Arial,sans-serif;font-size: 12px;"><%= videoDuration %></div>
 							</td>
 						</tr>
 					</tbody>
