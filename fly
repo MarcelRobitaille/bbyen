@@ -1,0 +1,30 @@
+#!/bin/zsh
+
+set -euf -o pipefail
+
+[[ -f .env ]] &&source .env
+
+log () { tput setaf 2; echo "\n$1\n"; tput sgr0 }
+
+log "Copying..."
+rsync \
+  -acv \
+  --stats \
+  --progress \
+  --exclude node_modules \
+  --exclude .git \
+  --exclude 'config.json' \
+  --exclude '*.swp' \
+  --exclude '*.sqlite' \
+  --exclude 'tags*' \
+  ./ "$BBYEN_HOST":"$BBYEN_INSTALL_DIR" | sed 's/^/  /'
+
+log "Installing modules..."
+ssh "$BBYEN_HOST" "cd $BBYEN_INSTALL_DIR; npm install --production" 2>&1 | sed 's/^/  /'
+
+log "Restarting node..."
+
+export BBYEN_NPM_BIN=$(ssh "$BBYEN_HOST" "sh -c '. ~/.nvm/nvm.sh; cd $BBYEN_INSTALL_DIR; nvm use > /dev/null; which npm'")
+envsubst < BBYEN.service.template | ssh "$BBYEN_HOST" "tee $BBYEN_INSTALL_DIR/BBYEN.service > /dev/null"
+ssh "$BBYEN_HOST" "sudo systemctl daemon-reload" | sed 's/^/  /'
+ssh "$BBYEN_HOST" "sudo systemctl restart BBYEN.service" | sed 's/^/  /'

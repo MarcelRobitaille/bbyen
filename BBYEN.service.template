@@ -1,3 +1,5 @@
+# vim: ft=systemd
+
 [Unit]
 Description=YouTube email notification system
 
@@ -6,10 +8,9 @@ User=1000
 Group=1000
 WorkingDirectory=/opt/bbyen/
 Environment="NODE_ENV=production"
-ExecStart=/opt/bbyen/start.sh
+ExecStart=$BBYEN_NPM_BIN start
 IgnoreSIGPIPE=false
 KillMode=process
 
 [Install]
 WantedBy=multi-user.target
-
