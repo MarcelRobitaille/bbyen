@@ -2,10 +2,11 @@ const fs = require('pn/fs')
 const path = require('path')
 
 const { OAuth2Client } = require('google-auth-library')
-const chalk = require('chalk')
 
 const readline = require('./readline.js')
 const credentials = require('../../../google-credentials.json')
+
+const logger = require('../../lib/logger')({ label: 'google-auth' })
 
 const SCOPES = [ 'https://www.googleapis.com/auth/youtube.readonly' ]
 const TOKEN_FILE = path.join(__dirname, '../../../.google-auth-token.json')
@@ -48,7 +49,7 @@ const genAuthToken = async oauth2Client => {
 	const code = await readline('Enter the code from that page: ')
 	const { tokens } = await oauth2Client.getToken(code)
 
-	console.log(chalk.magenta('[google-auth] Received token. Storing...'))
+	logger.info('Received token. Storing...')
 	await storeToken(tokens)
 
 	return tokens

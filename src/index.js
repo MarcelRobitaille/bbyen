@@ -9,6 +9,8 @@ const { parseFeedsAndNotify } = require('./videos')
 const { updateSubscriptions } = require('./subscriptions')
 const setIntervalInstant = require('./lib/setIntervalInstant')
 
+const logger = require('./lib/logger')({ label: 'main' })
+
 
 const main = async () => {
 	try {
@@ -35,7 +37,7 @@ const main = async () => {
 		)
 
 	} catch (err) {
-		console.error(err)
+		logger.error(err)
 	}
 }
 

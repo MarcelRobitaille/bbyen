@@ -1,16 +1,13 @@
-const chalk = require('chalk')
 const SQL = require('sql-template-strings')
 
 const { subscriptionIterator } = require('./google/iterators')
+const logger = require('./lib/logger')({ label: 'subscriptions' })
 
 
 const updateSubscriptions = async ({ db, service, auth }) => {
 	try {
 
-		console.log(
-			chalk.magenta('[subscriptions]'),
-			'Checking subscriptions...',
-		)
+		logger.info('Checking subscriptions...')
 
 		// Read all known subs from the database
 		const savedSubscriptions = new Set(
@@ -61,10 +58,7 @@ const updateSubscriptions = async ({ db, service, auth }) => {
 			for (let channelId of newSubscriptions.values()) {
 				const { title, thumbnail } = channelDetails[channelId]
 
-				console.log(
-					chalk.magenta('[subscriptions]'),
-					`New subscription: ${title}`,
-				)
+				logger.info(`New subscription: ${title}`)
 
 				await stmt.run(channelId, title, thumbnail)
 			}
@@ -83,24 +77,18 @@ const updateSubscriptions = async ({ db, service, auth }) => {
 			await stmt.finalize()
 		}
 
-		console.log(
-			chalk.magenta('[subscriptions]'),
-			'Done checking subscriptions...',
-		)
+		logger.info('Done checking subscriptions...')
 
 	} catch (err) {
 
 		// Avoid printing huge error object for quota issues
 		if (err?.errors?.[0]?.reason) {
-			console.log(
-				chalk.red('[update-subscriptions]'),
-				'Quota up. Failed to update subscriptions.',
-			)
+			logger.warn('Quota up. Failed to update subscriptions.')
 
 			return
 		}
 
-		console.error(err)
+		logger.error(err)
 	}
 }
 

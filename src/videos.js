@@ -1,8 +1,9 @@
-const chalk = require('chalk')
 const truncate = require('truncate')
 const RSSParser = require('rss-parser')
 const SQL = require('sql-template-strings')
 const { parse: parseDuration } = require('duration-fns')
+
+const logger = require('./lib/logger')({ label: 'videos' })
 
 const formatDuration = ISO8601Duration => {
 	const duration = parseDuration(ISO8601Duration)
@@ -27,7 +28,7 @@ const parseFeedsAndNotify = async ({
 }) => {
 	try {
 
-		console.log(chalk.magenta('[videos]'), 'Checking for new videos...')
+		logger.info('Checking for new videos...')
 
 		const parser = new RSSParser({
 			customFields: {
@@ -43,10 +44,7 @@ const parseFeedsAndNotify = async ({
 
 		for (let { channelId, channelTitle, channelThumbnail } of channels) {
 
-			console.log(
-				chalk.magenta('[videos]'),
-				`Checking channel ${channelTitle} (${channelId})`,
-			)
+			logger.verbose(`Checking channel ${channelTitle} (${channelId})`)
 
 			const videosSent = new Set((await db.all(SQL`
 				SELECT videoId FROM videos WHERE channelId=${channelId};
@@ -77,10 +75,9 @@ const parseFeedsAndNotify = async ({
 					const videoDuration =
 						formatDuration(details.contentDetails.duration)
 
-					console.log(
-						chalk.magenta('[videos]'),
+					logger.verbose(
 						`New video from ${channelTitle} (id: ${videoId}):`,
-						videoTitle
+						videoTitle,
 					)
 
 					await transporter.sendMail({
@@ -110,26 +107,22 @@ const parseFeedsAndNotify = async ({
 				} catch (err) {
 
 					if (err.code === 'EMESSAGE' && err.responseCode === 550) {
-						console.log(
-							chalk.red('[videos]'),
+						logger.warn(
 							'Email quota has run out.',
 							'Abandoning, will retry on next timer trigger.',
 						)
 						return
 					}
 
-					console.error(err)
+					logger.error(err)
 				}
 			}
 		}
 
 
-		console.log(
-			chalk.magenta('[videos]'),
-			'Finished checking for new videos',
-		)
+		logger.info('Finished checking for new videos')
 	} catch (err) {
-		console.error(err)
+		logger.error(err)
 	}
 }
 
