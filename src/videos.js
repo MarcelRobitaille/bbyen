@@ -20,11 +20,11 @@ const formatDuration = ISO8601Duration => {
 
 const parseFeedsAndNotify = async ({
 	db,
-	service,
 	auth,
+	config,
+	service,
 	transporter,
 	emailTemplate,
-	config,
 }) => {
 	try {
 
@@ -62,9 +62,13 @@ const parseFeedsAndNotify = async ({
 
 					const details = (await service.videos.list({
 						auth,
-						part: 'contentDetails,snippet',
+						part: 'contentDetails,snippet,liveStreamingDetails',
 						id: videoId,
 					})).data.items[0]
+
+					if (!details?.liveStreamingDetails?.actualEndTime) {
+						continue
+					}
 
 					const videoTitle = truncate(details.snippet.title, 70)
 					const { channelTitle } = details.snippet
@@ -92,6 +96,7 @@ const parseFeedsAndNotify = async ({
 							videoThumbnail,
 							videoTitle,
 							videoDuration,
+							videoWasLivestream: details.liveStreamingDetails,
 							videoURL: [
 								'https://www.youtube.com/attribution_link?u=/',
 								encodeURIComponent(`watch?v=${videoId}`),
