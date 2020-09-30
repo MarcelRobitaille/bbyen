@@ -25,7 +25,7 @@ It uses the [YouTube Data API](https://developers.google.com/youtube/v3/) to get
 1. Download the source code
 
 	```
-	git clone https://github.com/Iambecomeroot/bbyen.git
+	git clone https://github.com/MarcelRobitaille/bbyen.git
 	```
 
 1. Download packages
