@@ -110,7 +110,12 @@ const parseFeedsAndNotify = async ({
 
 				} catch (err) {
 
-					if (err.code === 'EMESSAGE' && err.responseCode === 550) {
+					if ([
+						// EMESSAGE
+						550,
+						// Gmail uses these
+						421, 454,
+					].includes(err.responseCode)) {
 						logger.warn(
 							'Email quota has run out.',
 							'Abandoning, will retry on next timer trigger.',
