@@ -45,6 +45,7 @@ const subscriptionIterator = (service, auth) => _genericIterator(
 	{
 		auth,
 		part: 'snippet,contentDetails',
+		order: 'alphabetical',
 		mine: true,
 		maxResults: 50,
 	},
