@@ -5,9 +5,7 @@ const { parse: parseDuration } = require('duration-fns')
 
 const logger = require('./lib/logger')({ label: 'videos' })
 
-const formatDuration = ISO8601Duration => {
-	const duration = parseDuration(ISO8601Duration)
-
+const formatDuration = duration => {
 	const hours = duration.hours === 0 ? '' : `${duration.hours}:`
 	const minutes = String(duration.minutes)
 		.padStart(duration.hours > 0 ? 2 : 0, '0') + ':'
@@ -66,10 +64,6 @@ const parseFeedsAndNotify = async ({
 						id: videoId,
 					})).data.items[0]
 
-					if (!details?.liveStreamingDetails?.actualEndTime) {
-						continue
-					}
-
 					const videoTitle = truncate(details.snippet.title, 70)
 					const { channelTitle } = details.snippet
 					const { url: videoThumbnail } =
@@ -77,7 +71,12 @@ const parseFeedsAndNotify = async ({
 						details.snippet.thumbnails.standard ??
 						details.snippet.thumbnails.high
 					const videoDuration =
-						formatDuration(details.contentDetails.duration)
+						parseDuration(details.contentDetails.duration)
+
+					if (!details?.liveStreamingDetails?.actualEndTime ||
+							videoDuration === 0) {
+						continue
+					}
 
 					logger.verbose(
 						`New video from ${channelTitle} (id: ${videoId}):`,
@@ -95,7 +94,7 @@ const parseFeedsAndNotify = async ({
 							videoId,
 							videoThumbnail,
 							videoTitle,
-							videoDuration,
+							videoDuration: formatDuration(videoDuration),
 							videoWasLivestream: details.liveStreamingDetails,
 							videoURL: [
 								'https://www.youtube.com/attribution_link?u=/',
