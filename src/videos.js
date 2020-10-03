@@ -73,8 +73,8 @@ const parseFeedsAndNotify = async ({
 					const videoDuration =
 						parseDuration(details.contentDetails.duration)
 
-					if (!details?.liveStreamingDetails?.actualEndTime ||
-							videoDuration === 0) {
+					if ('liveStreamingDetails' in details &&
+							!details.liveStreamingDetails.actualEndTime) {
 						continue
 					}
 
