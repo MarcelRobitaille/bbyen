@@ -14,7 +14,7 @@ const dateFns = require('date-fns')
 async function* _genericIterator (method, params) {
 	let nextPageToken = null
 
-	while (true) {
+	do {
 
 		// Call given method with given params
 		const res = await method({
@@ -24,12 +24,10 @@ async function* _genericIterator (method, params) {
 
 		nextPageToken = res.data.nextPageToken
 
-		// If received `nextPageToken` undefined, there is no more data
-		if (nextPageToken === undefined) return
-
 		// Yield all data entries
 		yield* res.data.items
-	}
+
+	} while (nextPageToken)
 }
 
 
