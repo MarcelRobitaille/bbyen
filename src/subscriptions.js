@@ -73,6 +73,8 @@ const updateSubscriptions = async ({ db, service, auth }) => {
 
 			for (let channelId of removedSubscriptions.values()) {
 				await stmt.run(channelId)
+
+				logger.info(`Removed subscription: ${channelId}`)
 			}
 			await stmt.finalize()
 		}
