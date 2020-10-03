@@ -9,8 +9,6 @@ Group=1000
 WorkingDirectory=/opt/bbyen/
 Environment="NODE_ENV=production"
 ExecStart=$BBYEN_NPM_BIN start
-IgnoreSIGPIPE=false
-KillMode=process
 
 [Install]
 WantedBy=multi-user.target
