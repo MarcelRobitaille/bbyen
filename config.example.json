@@ -20,5 +20,8 @@
 	"kickoff": {
 		"subscriptions": true,
 		"videos": true
+	},
+	"logging": {
+		"level": "info"
 	}
 }
