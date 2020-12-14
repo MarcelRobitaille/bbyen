@@ -54,7 +54,17 @@ It uses the [YouTube Data API](https://developers.google.com/youtube/v3/) to get
 
 	1. Go to https://console.developers.google.com/apis/credentials and create OAuth 2.0 Client credentials
 
-	1. Download the credentaisl JSON file and save it as `google-credentials.json` in the folder where you downloaded the project.
+		1. Click "Create Credentials" and then "OAuth client ID"
+		![Create Credentials Options](./docs/oauth_create_credentials.png)
+
+		1. Select "Desktop app" for "Application type"
+		![Create Credentials Application Type](./docs/oauth_application_type.png)
+
+		1. Click "Create"
+
+	1. Click the download button next to the new OAuth 2.0 Client ID.
+	Download the credentials JSON file and save it as `google-credentials.json` in the folder where you downloaded the project.
+	![OAuth Credentials Download](./docs/oauth_download.png)
 
 	1. Go to https://console.developers.google.com/apis/library, search for and click "YouTube Data API v3", and enable this api.
 
