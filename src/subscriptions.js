@@ -4,7 +4,7 @@ const { subscriptionIterator } = require('./google/iterators')
 const logger = require('./lib/logger')({ label: 'subscriptions' })
 
 
-const updateSubscriptions = async ({ db, service, auth }) => {
+const updateSubscriptions = async ({ db, service, auth, config }) => {
 	try {
 
 		logger.info('Checking subscriptions...')
@@ -23,7 +23,16 @@ const updateSubscriptions = async ({ db, service, auth }) => {
 			const { resourceId: { channelId }, title }
 				= sub.snippet
 
-			logger.verbose(title)
+			if (Array.isArray(config.blacklistedChannelIds) &&
+					config.blacklistedChannelIds.includes(channelId)) {
+				logger.warn([
+					'Ignoring channel in blacklist: ',
+					`${title} (${channelId})`,
+				].join(''))
+				continue
+			}
+
+			logger.verbose(title, channelId)
 			logger.debug(JSON.stringify(sub.contentDetails, null, '	'))
 
 			updatedSubscriptions.add(channelId)

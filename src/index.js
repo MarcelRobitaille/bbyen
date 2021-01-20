@@ -26,7 +26,7 @@ const main = async () => {
 			updateSubscriptions,
 			parseDuration(config.timers.subscriptions),
 			config.kickoff.subscriptions,
-			{ db, service, auth },
+			{ db, service, auth, config },
 		)
 
 		setIntervalInstant(
