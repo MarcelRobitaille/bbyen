@@ -20,9 +20,11 @@ const updateSubscriptions = async ({ db, service, auth }) => {
 		const channelDetails = new Map()
 		for await (let sub of subscriptionIterator(service, auth)) {
 
-
 			const { resourceId: { channelId }, title }
 				= sub.snippet
+
+			logger.verbose(title)
+			logger.debug(JSON.stringify(sub.contentDetails, null, '	'))
 
 			updatedSubscriptions.add(channelId)
 			channelDetails[channelId] = {
@@ -70,9 +72,14 @@ const updateSubscriptions = async ({ db, service, auth }) => {
 			`)
 
 			for (let channelId of removedSubscriptions.values()) {
+				const { channelTitle } = await db.get(SQL`
+					SELECT channelTitle
+					FROM subscriptions
+					WHERE channelId=${channelId};
+				`)
 				await stmt.run(channelId)
 
-				logger.info(`Removed subscription: ${channelId}`)
+				logger.info(`Removed subscription: ${channelTitle}`)
 			}
 			await stmt.finalize()
 		}
