@@ -20,8 +20,6 @@ const updateSubscriptions = async ({ db, service, auth }) => {
 		const channelDetails = new Map()
 		for await (let sub of subscriptionIterator(service, auth)) {
 
-			// Skip subscriber if not signed up for notifications
-			if (sub.contentDetails.activityType !== 'all') continue
 
 			const { resourceId: { channelId }, title }
 				= sub.snippet
