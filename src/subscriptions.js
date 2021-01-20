@@ -32,6 +32,15 @@ const updateSubscriptions = async ({ db, service, auth, config }) => {
 				continue
 			}
 
+			if (Array.isArray(config.whitelistedChannelIds) &&
+					!config.whitelistedChannelIds.includes(channelId)) {
+				logger.warn([
+					'Ignoring channel not in whitelacklist: ',
+					`${title} (${channelId})`,
+				].join(''))
+				continue
+			}
+
 			logger.verbose(title, channelId)
 			logger.debug(JSON.stringify(sub.contentDetails, null, '	'))
 
