@@ -73,7 +73,10 @@ const parseFeedsAndNotify = async ({
 					const videoDuration =
 						parseDuration(details.contentDetails.duration)
 
-					if ('liveStreamingDetails' in details &&
+					const isLiveStreamOrPremere =
+						'liveStreamingDetails' in details
+
+					if (isLiveStreamOrPremere &&
 							!details.liveStreamingDetails.actualEndTime) {
 						continue
 					}
@@ -94,8 +97,8 @@ const parseFeedsAndNotify = async ({
 							videoId,
 							videoThumbnail,
 							videoTitle,
+							isLiveStreamOrPremere,
 							videoDuration: formatDuration(videoDuration),
-							videoWasLivestream: details.liveStreamingDetails,
 							videoURL: [
 								'https://www.youtube.com/attribution_link?u=/',
 								encodeURIComponent(`watch?v=${videoId}`),
