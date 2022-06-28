@@ -10,6 +10,7 @@
 		"sendingContact": "\"BBYEN\" <your-automated-email@example.com>",
 		"destination": "your-personal-email@example.com"
 	},
+	"port": 3030,
 	"database": {
 		"filename": "database.sqlite"
 	},

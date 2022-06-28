@@ -1,12 +1,16 @@
 const fs = require('pn/fs')
 const path = require('path')
+const http = require('http')
+const url = require('url')
 
+const open = require('open')
 const { OAuth2Client } = require('google-auth-library')
 
 const readline = require('./readline.js')
 const credentials = require('../../../google-credentials.json')
 
 const logger = require('../../lib/logger')({ label: 'google-auth' })
+const config = require('../../../config.json')
 
 const SCOPES = [ 'https://www.googleapis.com/auth/youtube.readonly' ]
 const TOKEN_FILE = path.join(__dirname, '../../../.google-auth-token.json')
@@ -39,17 +43,39 @@ const storeToken = token => {
  */
 
 const genAuthToken = async oauth2Client => {
+
 	const authUrl = oauth2Client.generateAuthUrl({
 		access_type: 'offline',
 		scope: SCOPES,
 	})
 
-	console.log(`Authorize at: ${authUrl}`)
+	logger.info(`Opening authorization url: ${authUrl}`)
+	open(authUrl)
 
-	const code = await readline('Enter the code from that page: ')
-	const { tokens } = await oauth2Client.getToken(code)
+	const tokens = await new Promise((resolve, reject) => {
+		const handler = async (req, res) => {
+			res.writeHead(200)
 
-	logger.info('Received token. Storing...')
+			const code = url.parse(req.url, true).query.code
+			logger.info(`Got code: ${code}`)
+
+			try {
+				logger.info('Creating tokens from code')
+				const { tokens } = await oauth2Client.getToken(code)
+				res.end('Authorization successful. You may now close this tab.')
+				resolve(tokens)
+			} catch (err) {
+				console.error(err)
+				res.end(`Authorization failed. ${err}`)
+				reject(err)
+			}
+			server.close()
+		}
+		const server = http.createServer(handler)
+		server.listen(config.port)
+	})
+
+	logger.info('Storing tokens')
 	await storeToken(tokens)
 
 	return tokens
@@ -90,7 +116,7 @@ const authorize = async () => {
 	const oauth2Client = new OAuth2Client(
 		credentials.installed.client_id,
 		credentials.installed.client_secret,
-		credentials.installed.redirect_uris[0],
+		`http://localhost:${config.port}/authorization_code`,
 	)
 
 	oauth2Client.setCredentials(await getToken(oauth2Client))
