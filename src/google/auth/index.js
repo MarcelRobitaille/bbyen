@@ -49,10 +49,13 @@ const genAuthToken = async oauth2Client => {
 		scope: SCOPES,
 	})
 
-	logger.info(`Opening authorization url: ${authUrl}`)
+	logger.debug(`Opening authorization url: ${authUrl}`)
+	console.log(`Autneticating. If a browser window is not automatically opened, please open the following link: ${authUrl}`)
 	open(authUrl)
 
-	const tokens = await new Promise((resolve, reject) => {
+	// Set up a webserver to automatically get the code after Google redirects to
+	// localhost
+	const automatedMethod = new Promise((resolve, reject) => {
 		const handler = async (req, res) => {
 			logger.debug(`[${req.method}] ${req.url}`)
 			if (!req.url.startsWith('/authorization_code')) {
@@ -88,6 +91,14 @@ const genAuthToken = async oauth2Client => {
 		const server = http.createServer(handler)
 		server.listen(config.port)
 	})
+
+	// Also support copy/pasting the code if the automatic method does not work
+	// or the system is headless
+	const manualMethod = readline('Enter the code from that page: ')
+		.then(code => oauth2Client.getToken(code))
+		.then(({ tokens }) => tokens)
+
+	const tokens = await Promise.race([automatedMethod, manualMethod])
 
 	logger.info('Storing tokens')
 	await storeToken(tokens)
