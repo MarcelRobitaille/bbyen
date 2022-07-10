@@ -75,7 +75,12 @@ Run the project with:
 node src/index.js
 ```
 
-On the first run, the app will have to authenticate. A link will be printed. Open it in your browser and follow the instructions. Finally, the website will give a code. Copy this code and paste it back in the terminal.
+On the first run, you will need to authenticate the app, tying it to your Google account (the subscriptions will come from whatever account you use):
+1. A browser window should open automatically. If not, or if the system is headless, the URL will be printed in the console. Copy/paste it into a new tab.
+1. Follow the instructions on this page.
+1. You may have to click "Advanced" and "Got to bbyen (unsafe)". This is because the app hasn't been verified, but the server is trustworthy (you are running it).
+1. After authenticating in the website, Google should automatically redirect you to your server, which will transfer the authentication code. In this case you will see a message "Authorization successful. You may now close this tab.".
+If this does not work (if you see "Unable to connect"), please copy/paste the URL from the browser address bar into the console.
 
 ## Alternatives
 
