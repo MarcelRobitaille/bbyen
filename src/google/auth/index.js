@@ -95,6 +95,9 @@ const genAuthToken = async oauth2Client => {
 	// Also support copy/pasting the code if the automatic method does not work
 	// or the system is headless
 	const manualMethod = readline('Enter the code from that page: ')
+		// Support pasting the full URL, which is more convenient than manually
+		// extracting the code
+		.then(url => '&' in url ? url.parse(url, true).query.code : url)
 		.then(code => oauth2Client.getToken(code))
 		.then(({ tokens }) => tokens)
 
