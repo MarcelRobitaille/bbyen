@@ -54,7 +54,16 @@ const genAuthToken = async oauth2Client => {
 
 	const tokens = await new Promise((resolve, reject) => {
 		const handler = async (req, res) => {
-			res.writeHead(200)
+			if (!req.url.startsWith('/authorization_code')) {
+				logger.info(`Ignoring request to ${req.url}`)
+				res.writeHead(404)
+				return
+			}
+			if (req.method != 'GET') {
+				logger.info(`Ignoring request with unsupported method ${req.method}`)
+				res.writeHead(404)
+				return
+			}
 
 			const code = url.parse(req.url, true).query.code
 			logger.info(`Got code: ${code}`)
@@ -63,10 +72,12 @@ const genAuthToken = async oauth2Client => {
 				logger.info('Creating tokens from code')
 				const { tokens } = await oauth2Client.getToken(code)
 				res.end('Authorization successful. You may now close this tab.')
+				res.writeHead(200)
 				resolve(tokens)
 			} catch (err) {
 				console.error(err)
 				res.end(`Authorization failed. ${err}`)
+				res.writeHead(500)
 				reject(err)
 			}
 			server.close()
