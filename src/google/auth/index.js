@@ -54,6 +54,7 @@ const genAuthToken = async oauth2Client => {
 
 	const tokens = await new Promise((resolve, reject) => {
 		const handler = async (req, res) => {
+			logger.debug(`[${req.method}] ${req.url}`)
 			if (!req.url.startsWith('/authorization_code')) {
 				logger.info(`Ignoring request to ${req.url}`)
 				res.writeHead(404)
@@ -65,7 +66,9 @@ const genAuthToken = async oauth2Client => {
 				return
 			}
 
-			const code = url.parse(req.url, true).query.code
+			const queryParams = url.parse(req.url, true)
+			logger.debug(`Request query params: ${queryParams}`)
+			const code = queryParams.query.code
 			logger.info(`Got code: ${code}`)
 
 			try {
