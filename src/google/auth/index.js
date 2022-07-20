@@ -1,7 +1,7 @@
 const fs = require('pn/fs')
 const path = require('path')
 const http = require('http')
-const url = require('url')
+const parseURL = require('url').parse
 
 const open = require('open')
 const { OAuth2Client } = require('google-auth-library')
@@ -69,7 +69,7 @@ const genAuthToken = async oauth2Client => {
 				return
 			}
 
-			const queryParams = url.parse(req.url, true)
+			const queryParams = parseURL(req.url, true)
 			logger.debug(`Request query params: ${queryParams}`)
 			const code = queryParams.query.code
 			logger.info(`Got code: ${code}`)
@@ -97,7 +97,7 @@ const genAuthToken = async oauth2Client => {
 	const manualMethod = readline('Enter the code from that page: ')
 		// Support pasting the full URL, which is more convenient than manually
 		// extracting the code
-		.then(url => url.includes('&') ? url.parse(url, true).query.code : url)
+		.then(url => url.includes('&') ? parseURL(url, true).query.code : url)
 		.then(code => oauth2Client.getToken(code))
 		.then(({ tokens }) => tokens)
 
