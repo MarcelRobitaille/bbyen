@@ -95,3 +95,11 @@ Here are some advantages of BBYEN over manually configuring RSS feeds:
 - No ads.
 - You don't have to manually go through all your subscriptions. It will automatically find all subscriptions you have notifications for.
 - It will automatically detect new subscriptions and unsubscriptions.
+
+## Contributing
+
+Pull requests welcome.
+
+I also accept donations, but please consider other, more worthy causes.
+
+[![PayPal](https://img.shields.io/badge/PayPal-00457C?style=for-the-badge&logo=paypal&logoColor=white)](https://www.paypal.com/donate/?business=YURJXF4KG96YA&no_recurring=0&item_name=Open+source+software&currency_code=CAD)
