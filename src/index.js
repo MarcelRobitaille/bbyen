@@ -1,7 +1,7 @@
 const { google } = require('googleapis')
 const parseDuration = require('parse-duration')
 
-const config = require('../config.json')
+const { loadConfig } = require('./config.js')
 const database = require('./database')
 const authorize = require('./google/auth')
 const mailer = require('./email')
@@ -17,6 +17,8 @@ const main = async () => {
 
 		const service = google.youtube('v3')
 		const auth = await authorize()
+
+		const config = loadConfig(service, auth)
 
 		const db = await database.init(config.database)
 
