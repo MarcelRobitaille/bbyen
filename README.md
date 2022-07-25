@@ -82,6 +82,42 @@ On the first run, you will need to authenticate the app, tying it to your Google
 1. After authenticating in the website, Google should automatically redirect you to your server, which will transfer the authentication code. In this case you will see a message "Authorization successful. You may now close this tab.".
 If this does not work (if you see "Unable to connect"), please copy/paste the URL from the browser address bar into the console.
 
+## Configuration
+
+### Channel Whitelist and Blacklist
+
+In some instances, you may want to stop receiving notifications from a list of channels (blacklist)
+or only receive notifications from a list of channels (whitelist).
+Unfortunately, there is no way to check the notification status (bell icon set to "all", "personalized", or "none") from the API.
+Thus, blacklist and whitelist options were added to the configuration file.
+
+You can use the keys `blacklistedChannelIds` and `whitelistedChannelIds` in the top level of `config.json`.
+These should be arrays of the channel IDs you want to include/exclude.
+For example:
+```json
+{
+	"email": {},
+	...
+	"blacklistedChannelIds": [ "xxx", "yyy" ],
+	"whitelistedChannelIds": [ "zzz" ]
+}
+```
+If the key `whitelistedChannelIds` is present, notifications will only be sent for those channels.
+If `blacklistedChannelIds` is present, any notifications that would be sent for channels are skipped.
+
+The channel ID is usually at the end of the URL of the channel's page.
+However, sometimes this is not the true ID but some customized shorter and readable string.
+In this case, you may paste the entire channel page URL into the config.
+Note that the next time you run the software, this will be replaced with the channel ID
+so this conversion only has to happen once (it uses the API so there is a small cost to this).
+You may also find the channel ID by looking in the database file.
+
+This is admittedly a manual and complicated process.
+That is because this feature is indented for advanced users.
+If there is demand, I will consider a more user-friendly implementation.
+
+Please see #6 for more information on this.
+
 ## Alternatives
 
 It is possible to manually set up RSS feeds for each channel you are interested in. It is a very lengthy process.
