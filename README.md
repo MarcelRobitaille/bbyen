@@ -107,10 +107,10 @@ If `blacklistedChannelIds` is present, any notifications that would be sent for 
 
 The channel ID is usually at the end of the URL of the channel's page.
 However, sometimes this is not the true ID but some customized shorter and readable string.
-In this case, you may paste the entire channel page URL into the config.
-Note that the next time you run the software, this will be replaced with the channel ID
-so this conversion only has to happen once (it uses the API so there is a small cost to this).
-You may also find the channel ID by looking in the database file.
+In this case, you may:
+- Paste the entire channel page URL into the config. Note that the next time you run the software, this will be replaced with the channel ID so this conversion only has to happen once (it uses the API so there is a small cost to this).
+- Run `copy(window.ytInitialData.metadata.channelMetadataRenderer.externalId)` in the developer console. On the channel page, press F12, click "Console", and paste this command. The channel ID will get copied to your clipboard.
+- You may also find the channel ID by looking in the database file.
 
 This is admittedly a manual and complicated process.
 That is because this feature is indented for advanced users.
