@@ -20,6 +20,8 @@ const main = async () => {
 
 		const config = loadConfig(service, auth)
 
+		console.log(config)
+
 		const db = await database.init(config.database)
 
 		const { transporter, emailTemplate } = await mailer.init(config.email)
@@ -40,6 +42,7 @@ const main = async () => {
 
 	} catch (err) {
 		logger.error(err)
+		console.error(err)
 	}
 }
 
