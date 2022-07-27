@@ -18,7 +18,7 @@ const main = async () => {
 		const service = google.youtube('v3')
 		const auth = await authorize()
 
-		const config = loadConfig(service, auth)
+		const config = await loadConfig(service, auth)
 
 		const db = await database.init(config.database)
 
