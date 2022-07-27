@@ -11,22 +11,39 @@ const loadConfig = async (service, auth) => {
 
 	// Get the channel ID from the URL using the data API
 	const normalizeChannel = async channel => {
-		try {
-			new URL(channel)
-		} catch (e) {
+
+		// If the string is already just the channel ID
+		if (/^[0-9a-zA-Z_]{24}$/.test(channel)) {
 			return channel
 		}
 
-		const res = await service.search.list({
-			auth,
-			part: 'id',
-			q: channel,
-			maxResults: 1,
-			order: 'relevance',
-			type: 'channel',
-		})
+		// If the string is the channel URL with the ID built in
+		const re = /^https:\/\/www.youtube.com\/channel\/([0-9a-zA-Z_]{24})\/?$/
+		const match = channel.match(re)
+		if (match) {
+			return match[1]
+		}
 
-		return res.data.items[0].id.channelId
+		// If it's the custom channel URL, try to get the ID from the API
+		if (/^https:\/\/www.youtube.com\/c\/.*/.test(channel)) {
+			const res = await service.search.list({
+				auth,
+				part: 'id',
+				q: channel,
+				maxResults: 1,
+				order: 'relevance',
+				type: 'channel',
+			})
+
+			const items = res.data.items
+
+			if (!items.length) {
+				throw Exception(`Could not find channel ID using the API for '${channel}'. Please open a GitHub issue and show them this message: https://github.com/MarcelRobitaille/bbyen/issues/new`)
+			}
+			return items[0].id.channelId
+		}
+
+		throw Exception(`Exhausted all methods of getting the ID for channel '${channel}'. If this is a mistake, please open a GitHub issue and show them this message: https://github.com/MarcelRobitaille/bbyen/issues/new`)
 	}
 
 	// Allow the channel to be the URL, which may not be the channel ID
