@@ -13,7 +13,7 @@ const loadConfig = async (service, auth) => {
 	const normalizeChannel = async channel => {
 
 		// If the string is already just the channel ID
-		if (/^[0-9a-zA-Z_]{24}$/.test(channel)) {
+		if (/^[0-9a-zA-Z_-]{24}$/.test(channel)) {
 			return channel
 		}
 
