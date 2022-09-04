@@ -38,12 +38,12 @@ const loadConfig = async (service, auth) => {
 			const items = res.data.items
 
 			if (!items.length) {
-				throw Exception(`Could not find channel ID using the API for '${channel}'. Please open a GitHub issue and show them this message: https://github.com/MarcelRobitaille/bbyen/issues/new`)
+				throw new Error(`Could not find channel ID using the API for '${channel}'. Please open a GitHub issue and show them this message: https://github.com/MarcelRobitaille/bbyen/issues/new`)
 			}
 			return items[0].id.channelId
 		}
 
-		throw Exception(`Exhausted all methods of getting the ID for channel '${channel}'. If this is a mistake, please open a GitHub issue and show them this message: https://github.com/MarcelRobitaille/bbyen/issues/new`)
+		throw new Error(`Exhausted all methods of getting the ID for channel '${channel}'. If this is a mistake, please open a GitHub issue and show them this message: https://github.com/MarcelRobitaille/bbyen/issues/new`)
 	}
 
 	// Allow the channel to be the URL, which may not be the channel ID
