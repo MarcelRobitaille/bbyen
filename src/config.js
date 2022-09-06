@@ -1,10 +1,11 @@
+const process = require('process')
 const path = require('path')
 const fs = require('pn/fs')
 
 const deepEqual = require('./lib/deepEqual.js')
 
-
-const CONFIG_FILE = path.join(__dirname, '../config.json')
+const CONFIG_DIR = process.env.CONFIG_DIR ?? path.join(__dirname, '..')
+const CONFIG_FILE = path.join(CONFIG_DIR, 'config.json')
 
 
 const loadConfig = async (service, auth) => {
@@ -71,4 +72,4 @@ const loadConfig = async (service, auth) => {
 	return normalizedConfig
 }
 
-module.exports = { loadConfig }
+module.exports = { loadConfig, CONFIG_DIR, CONFIG_FILE }

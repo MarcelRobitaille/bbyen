@@ -1,0 +1,13 @@
+version: "3.7"
+
+services:
+  bbyen:
+    image: marcelrobitaille/bbyen:latest
+    container_name: bbyen
+    environment:
+      CONFIG_DIR: "/usr/src/app/config"
+    volumes:
+      - ./config:/usr/src/app/config
+    ports:
+      - 3050:3050
+    restart: unless-stopped

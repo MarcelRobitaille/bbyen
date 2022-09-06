@@ -17,10 +17,19 @@ It uses the [YouTube Data API](https://developers.google.com/youtube/v3/) to get
 
 ## Requirements
 
+- [Docker](https://www.docker.com/)
+
+or
+
 - [node.js](https://nodejs.org/en/) >= 14
 - [git](https://git-scm.com/) (used during setup to download the project)
 
 ## Installation and setup
+
+There are two methods to run this software.
+You may run it on bare metal, or take advantage of the Docker image published to Docker Hub.
+
+### Bare metal
 
 1. Download the source code
 
@@ -34,13 +43,44 @@ It uses the [YouTube Data API](https://developers.google.com/youtube/v3/) to get
 	npm install --production
 	```
 
-1. Populate the `config.json` file
-
+1. Copy the template configuration file and save it as `config.json`
 	```
-	mv config.example.json config.json
+	cp config.example.json config.json
 	```
 
-	Then update `email.host`, `email.auth`, and `email.sendingContact`. These are the settings to send email over SMTP.
+1. [Perform the initial configuration](#initial-configuration)
+
+### Docker
+
+1. Create an empty folder on your computer
+	```
+	mkdir -p ~/docker/bbyen
+	cd ~/docker/bbyen
+	```
+1. Copy the `docker-compose.yml` from this repository to that folder
+	```
+	wget https://raw.githubusercontent.com/MarcelRobitaille/bbyen/master/docker-compose.yml
+	```
+1. Create a subfolder `config`
+	```
+	mkdir config
+	```
+	This folder will be mounted in the Docker image as a volume and will hold the configuration file and Google authentication files.
+1. Copy the configuration file template to the `config` folder and save it as `config.json`
+	```
+	wget https://raw.githubusercontent.com/MarcelRobitaille/bbyen/master/config.example.json \
+	  -O config/config.json
+	```
+1. [Perform the initial configuration](#initial-configuration)
+
+## Initial Configuration
+
+After installing the software using either the bare metal or Docker method,
+it is mandatory to configure certain values and to set up Google API credentials.
+
+1. Populate the `config.json` file (`config/config.json` in the Docker method)
+
+	Update `email.host`, `email.auth`, and `email.sendingContact`. These are the settings to send email over SMTP.
 
 	Change `email.destination` to the email address where videos should be sent.
 
@@ -63,17 +103,27 @@ It uses the [YouTube Data API](https://developers.google.com/youtube/v3/) to get
 		1. Click "Create"
 
 	1. Click the download button next to the new OAuth 2.0 Client ID.
-	Download the credentials JSON file and save it as `google-credentials.json` in the folder where you downloaded the project.
+	Download the credentials JSON file and save it as described below:
+		- Bare metal installation: `google-credentials.json` in the folder where you downloaded the project
+		- Docker installation: `config/google-credentials.json`
 	![OAuth Credentials Download](./docs/oauth_download.png)
 
 	1. Go to https://console.developers.google.com/apis/library, search for and click "YouTube Data API v3", and enable this api.
 
 ## Running
 
-Run the project with:
+### Bare Metal
+
 ```
 node src/index.js
 ```
+
+### Docker
+```
+sudo docker-compose up
+```
+
+## Authentication
 
 On the first run, you will need to authenticate the app, tying it to your Google account (the subscriptions will come from whatever account you use):
 1. A browser window should open automatically. If not, or if the system is headless, the URL will be printed in the console. Copy/paste it into a new tab.
@@ -82,7 +132,7 @@ On the first run, you will need to authenticate the app, tying it to your Google
 1. After authenticating in the website, Google should automatically redirect you to your server, which will transfer the authentication code. In this case you will see a message "Authorization successful. You may now close this tab.".
 If this does not work (if you see "Unable to connect"), please copy/paste the URL from the browser address bar into the console.
 
-## Configuration
+## Advanced Configuration
 
 ### Channel Whitelist and Blacklist
 
@@ -139,3 +189,17 @@ Pull requests welcome.
 I also accept donations, but please consider other, more worthy causes.
 
 [![PayPal](https://img.shields.io/badge/PayPal-00457C?style=for-the-badge&logo=paypal&logoColor=white)](https://www.paypal.com/donate/?business=YURJXF4KG96YA&no_recurring=0&item_name=Open+source+software&currency_code=CAD)
+
+## Development
+
+### Docker
+
+Building the docker image:
+```
+sudo docker build . -t marcel/bbyen
+```
+
+I had to use `--network host` to have `npm install` work correctly without timing out:
+```
+sudo docker build . -t marcel/bbyen --network host
+```
