@@ -19,7 +19,7 @@ jobs:
           # password: ${{ secrets.GITHUB_TOKEN }}
           # registry: docker.pkg.github.com
           # repository: ${{ github.repository }}/bbyen
-          tags: latest
+          tags: MarcelRobitaille/bbyen:latest
           push: true
       # - name: Publish to Docker Hub
       #   uses: docker/build-push-action@v1
