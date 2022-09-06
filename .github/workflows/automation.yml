@@ -35,3 +35,9 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+      - name: Update repo description
+        uses: peter-evans/dockerhub-description@v2
+        with:
+          repository: marcelrobitaille/bbyen
+          username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          password: ${{ secrets.DOCKER_HUB_PASSWORD }}
