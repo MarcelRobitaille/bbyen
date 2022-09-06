@@ -7,13 +7,15 @@ const open = require('open')
 const { OAuth2Client } = require('google-auth-library')
 
 const readline = require('./readline.js')
-const credentials = require('../../../google-credentials.json')
 
 const logger = require('../../lib/logger')({ label: 'google-auth' })
-const config = require('../../../config.json')
+const { CONFIG_DIR, CONFIG_FILE } = require('../../config.js')
+const config = require(CONFIG_FILE)
+
+const credentials = require(path.join(CONFIG_DIR, 'google-credentials.json'))
 
 const SCOPES = [ 'https://www.googleapis.com/auth/youtube.readonly' ]
-const TOKEN_FILE = path.join(__dirname, '../../../.google-auth-token.json')
+const TOKEN_FILE = path.join(CONFIG_DIR, 'google-auth-token.json')
 
 
 /**

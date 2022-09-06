@@ -1,6 +1,7 @@
 const winston = require('winston')
 
-const config = require('../../config.json')
+const { CONFIG_FILE } = require('../config.js')
+const config = require(CONFIG_FILE)
 
 const { format, transports } = winston
 
