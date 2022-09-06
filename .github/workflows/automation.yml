@@ -8,10 +8,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
       - name: Publish to GitHub Packages
-        uses: docker/build-push-action@v2
+        uses: docker/build-push-action@v3
         with:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
           registry: docker.pkg.github.com
           repository: ${{ github.repository }}/bbyen
           tags: latest
+          push: true
