@@ -139,3 +139,17 @@ Pull requests welcome.
 I also accept donations, but please consider other, more worthy causes.
 
 [![PayPal](https://img.shields.io/badge/PayPal-00457C?style=for-the-badge&logo=paypal&logoColor=white)](https://www.paypal.com/donate/?business=YURJXF4KG96YA&no_recurring=0&item_name=Open+source+software&currency_code=CAD)
+
+## Development
+
+### Docker
+
+Building the docker image:
+```
+sudo docker build . -t marcel/bbyen
+```
+
+I had to use `--network host` to have `npm install` work correctly without timing out:
+```
+sudo docker build . -t marcel/bbyen --network host
+```
