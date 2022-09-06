@@ -1,5 +1,7 @@
 # Bring Back YouTube Email Notifications!
 
+[Homepage](https://github.com/MarcelRobitaille/bbyen)
+
 ## Why?
 
 In August 2020, YouTube removed the feature of sending email notifications when a subscriber uploads a video. Many watchers, myself included, prefer email notifications to app notifications. Here are some reasons why email notifications so great:
