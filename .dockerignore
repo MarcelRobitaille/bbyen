@@ -1,5 +1,5 @@
 node_modules/
-config/
 *.log
 config.json
 google-credentials.json
+.google-auth-token.json

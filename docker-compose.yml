@@ -4,10 +4,11 @@ services:
   bbyen:
     image: marcelrobitaille/bbyen:latest
     container_name: bbyen
-    environment:
-      CONFIG_DIR: "/usr/src/app/config"
     volumes:
-      - ./config:/usr/src/app/config
+      - ./config.json:/usr/src/app/config.json
+      - ./google-credentials.json:/usr/src/app/google-credentials.json
+      - ./.google-auth-token.json:/usr/src/app/.google-auth-token.json
+      - ./database.sqlite:/usr/src/app/database.sqlite
     ports:
       - 3050:3050
     restart: unless-stopped

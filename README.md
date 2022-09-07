@@ -63,15 +63,10 @@ You may run it on bare metal, or take advantage of the Docker image published to
 	```
 	wget https://raw.githubusercontent.com/MarcelRobitaille/bbyen/master/docker-compose.yml
 	```
-1. Create a subfolder `config`
-	```
-	mkdir config
-	```
-	This folder will be mounted in the Docker image as a volume and will hold the configuration file and Google authentication files.
-1. Copy the configuration file template to the `config` folder and save it as `config.json`
+1. Copy the configuration file template and save it as `config.json`
 	```
 	wget https://raw.githubusercontent.com/MarcelRobitaille/bbyen/master/config.example.json \
-	  -O config/config.json
+	  -O config.json
 	```
 1. [Perform the initial configuration](#initial-configuration)
 
@@ -80,7 +75,7 @@ You may run it on bare metal, or take advantage of the Docker image published to
 After installing the software using either the bare metal or Docker method,
 it is mandatory to configure certain values and to set up Google API credentials.
 
-1. Populate the `config.json` file (`config/config.json` in the Docker method)
+1. Populate the `config.json` file
 
 	Update `email.host`, `email.auth`, and `email.sendingContact`. These are the settings to send email over SMTP.
 
@@ -105,9 +100,7 @@ it is mandatory to configure certain values and to set up Google API credentials
 		1. Click "Create"
 
 	1. Click the download button next to the new OAuth 2.0 Client ID.
-	Download the credentials JSON file and save it as described below:
-		- Bare metal installation: `google-credentials.json` in the folder where you downloaded the project
-		- Docker installation: `config/google-credentials.json`
+	Download the credentials JSON file and save it as `google-credentials.json` in the folder where you downloaded the project.
 	![OAuth Credentials Download](./docs/oauth_download.png)
 
 	1. Go to https://console.developers.google.com/apis/library, search for and click "YouTube Data API v3", and enable this api.
