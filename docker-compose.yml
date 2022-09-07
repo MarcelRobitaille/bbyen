@@ -2,7 +2,7 @@ version: "3.7"
 
 services:
   bbyen:
-    image: marcelrobitaille/bbyen:latest
+    image: marcelrobitaille/bbyen:2.0.0
     container_name: bbyen
     volumes:
       - ./config.json:/usr/src/app/config.json
