@@ -15,7 +15,7 @@ const config = require(CONFIG_FILE)
 const credentials = require(path.join(CONFIG_DIR, 'google-credentials.json'))
 
 const SCOPES = [ 'https://www.googleapis.com/auth/youtube.readonly' ]
-const TOKEN_FILE = path.join(CONFIG_DIR, 'google-auth-token.json')
+const TOKEN_FILE = path.join(CONFIG_DIR, '.google-auth-token.json')
 
 
 /**
