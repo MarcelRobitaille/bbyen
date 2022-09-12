@@ -3,9 +3,32 @@ const path = require('path')
 const fs = require('pn/fs')
 
 const deepEqual = require('./lib/deepEqual.js')
+const configSchema = require('../config.example.json')
 
 const CONFIG_DIR = process.env.CONFIG_DIR ?? path.join(__dirname, '..')
 const CONFIG_FILE = path.join(CONFIG_DIR, 'config.json')
+
+
+// Check that all the keys present in the example config file are also present
+// in the supplied config file
+// Eventually, we might need something more sophisticated (i.e. optional
+// settings), but for now, this is sufficient.
+const validateConfig = (received, expected = configSchema, path = []) => {
+	if (typeof expected === 'string') {
+		return;
+	}
+
+	for (const [key, val] of Object.entries(expected)) {
+		if (!(key in received)) {
+			console.error([
+				`Your config file is missing the key '${[...path, key].join('.')}'.`,
+				'Please check your config file and the README.md.'
+			].join(' '))
+			process.exit(1)
+		}
+		validateConfig(received[key], val, [...path, key])
+	}
+}
 
 
 const loadConfig = async (service, auth) => {
@@ -63,6 +86,7 @@ const loadConfig = async (service, auth) => {
 	})
 
 	const config = JSON.parse(await fs.readFile(CONFIG_FILE))
+	validateConfig(config)
 	const normalizedConfig = await normalizeConfig(config)
 
 	if (!deepEqual(config, normalizedConfig)) {
