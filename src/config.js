@@ -2,6 +2,7 @@ const process = require('process')
 const path = require('path')
 const fs = require('pn/fs')
 
+const logger = require('./lib/logger')({ label: 'main' })
 const deepEqual = require('./lib/deepEqual.js')
 const configSchema = require('../config.example.json')
 
@@ -35,9 +36,11 @@ const loadConfig = async (service, auth) => {
 
 	// Get the channel ID from the URL using the data API
 	const normalizeChannel = async channel => {
+		logger.verbose(`Normalizing channel string '${channel}'`)
 
 		// If the string is already just the channel ID
 		if (/^[0-9a-zA-Z_-]{24}$/.test(channel)) {
+			logger.verbose('String matches ID')
 			return channel
 		}
 
@@ -45,11 +48,13 @@ const loadConfig = async (service, auth) => {
 		const re = /^https:\/\/www.youtube.com\/channel\/([0-9a-zA-Z_-]{24})\/?$/
 		const match = channel.match(re)
 		if (match) {
+			logger.verbose('String matches URL with ID')
 			return match[1]
 		}
 
 		// If it's the custom channel URL, try to get the ID from the API
 		if (/^https:\/\/www.youtube.com\/c\/.*/.test(channel)) {
+			logger.verbose('String matches URL with channel name')
 			const res = await service.search.list({
 				auth,
 				part: 'id',
