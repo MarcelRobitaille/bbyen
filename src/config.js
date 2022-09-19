@@ -42,7 +42,7 @@ const loadConfig = async (service, auth) => {
 		}
 
 		// If the string is the channel URL with the ID built in
-		const re = /^https:\/\/www.youtube.com\/channel\/([0-9a-zA-Z_]{24})\/?$/
+		const re = /^https:\/\/www.youtube.com\/channel\/([0-9a-zA-Z_-]{24})\/?$/
 		const match = channel.match(re)
 		if (match) {
 			return match[1]
