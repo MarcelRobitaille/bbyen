@@ -33,7 +33,7 @@ const validateConfig = (received, expected = configSchema, path = []) => {
 
 const loadConfig = async (service, auth) => {
 	// This has to come here to avoid dependency loop
-	const logger = require('./lib/logger')({ label: 'main' })
+	const logger = require('./lib/logger')({ label: 'config' })
 
 	// Get the channel ID from the URL using the data API
 	const normalizeChannel = async channel => {
