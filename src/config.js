@@ -2,7 +2,6 @@ const process = require('process')
 const path = require('path')
 const fs = require('pn/fs')
 
-const logger = require('./lib/logger')({ label: 'main' })
 const deepEqual = require('./lib/deepEqual.js')
 const configSchema = require('../config.example.json')
 
@@ -33,6 +32,8 @@ const validateConfig = (received, expected = configSchema, path = []) => {
 
 
 const loadConfig = async (service, auth) => {
+	// This has to come here to avoid dependency loop
+	const logger = require('./lib/logger')({ label: 'main' })
 
 	// Get the channel ID from the URL using the data API
 	const normalizeChannel = async channel => {
