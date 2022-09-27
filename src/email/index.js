@@ -12,7 +12,7 @@ const init = async (config) => {
 		'utf-8',
 	))
 	const errorTemplate = ejs.compile(await fs.readFile(
-		path.join(__dirname, './error-template.ejs.ejs'),
+		path.join(__dirname, './error-template.ejs'),
 		'utf-8',
 	))
 
