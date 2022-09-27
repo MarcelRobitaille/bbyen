@@ -11,8 +11,20 @@ const init = async (config) => {
 		path.join(__dirname, './template.ejs'),
 		'utf-8',
 	))
+	const errorTemplate = ejs.compile(await fs.readFile(
+		path.join(__dirname, './error-template.ejs.ejs'),
+		'utf-8',
+	))
 
-	return { transporter, emailTemplate }
+	const sendErrorEmail = error =>
+		transporter.sendMail({
+			from: config.email.sendingContact,
+			to: config.email.destination,
+			subject: 'BBYEN encountered and error',
+			html: errorTemplate({ error }),
+		})
+
+	return { transporter, emailTemplate, sendErrorEmail }
 }
 
 module.exports = { init }

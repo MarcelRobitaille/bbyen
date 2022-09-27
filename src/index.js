@@ -22,22 +22,38 @@ const main = async () => {
 
 		const db = await database.init(config.database)
 
-		const { transporter, emailTemplate } = await mailer.init(config.email)
+		const { transporter, emailTemplate, sendErrorEmail } =
+			await mailer.init(config.email)
 
-		setIntervalInstant(
-			updateSubscriptions,
-			parseDuration(config.timers.subscriptions),
-			config.kickoff.subscriptions,
-			{ db, service, auth, config },
-		)
+		// Now that emailing is set up, we can send messages on error
+		// Set up new try/catch to do that
+		try {
+			setIntervalInstant(
+				updateSubscriptions,
+				parseDuration(config.timers.subscriptions),
+				config.kickoff.subscriptions,
+				{ db, service, auth, config },
+			)
 
-		setIntervalInstant(
-			parseFeedsAndNotify,
-			parseDuration(config.timers.videos),
-			config.kickoff.videos,
-			{ db, service, auth, transporter, emailTemplate, config },
-		)
+			setIntervalInstant(
+				parseFeedsAndNotify,
+				parseDuration(config.timers.videos),
+				config.kickoff.videos,
+				{ db, service, auth, transporter, emailTemplate, config },
+			)
 
+		} catch (err) {
+			try {
+				if (config.logging.emailOnError) {
+					await sendErrorEmail(err)
+				}
+			} catch (err) {
+				logger.warn(
+					'Error encountered when attempting to email about previous error')
+				logger.error(err)
+			}
+			throw err
+		}
 	} catch (err) {
 		logger.error(err)
 	}

@@ -24,6 +24,7 @@
 	},
 	"logging": {
 		"level": "info",
-		"stackTraceLimit": 10
+		"stackTraceLimit": 10,
+		"emailOnError": true
 	}
 }
