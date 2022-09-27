@@ -5,6 +5,7 @@ const config = require(CONFIG_FILE)
 
 const { format, transports } = winston
 
+Error.stackTraceLimit = config.logging.stackTraceLimit
 
 // const join = format(info => ({
 // 	...info,

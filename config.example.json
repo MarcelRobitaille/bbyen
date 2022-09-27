@@ -23,6 +23,7 @@
 		"videos": true
 	},
 	"logging": {
-		"level": "info"
+		"level": "info",
+		"stackTraceLimit": 10
 	}
 }
