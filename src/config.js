@@ -49,12 +49,13 @@ const loadConfig = async (service, auth) => {
 		const re = /^https:\/\/www.youtube.com\/channel\/([0-9a-zA-Z_-]{24})\/?$/
 		const match = channel.match(re)
 		if (match) {
-			logger.verbose('String matches URL with ID')
-			return match[1]
+			const id = match[1]
+			logger.verbose(`String matches URL with ID: ${id}`)
+			return id
 		}
 
 		// If it's the custom channel URL, try to get the ID from the API
-		if (/^https:\/\/www.youtube.com\/c\/.*/.test(channel)) {
+		if (/^https:\/\/www.youtube.com\/(?:c|channel)\/.*/.test(channel)) {
 			logger.verbose('String matches URL with channel name')
 			const res = await service.search.list({
 				auth,
