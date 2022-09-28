@@ -15,7 +15,7 @@ const CONFIG_FILE = path.join(CONFIG_DIR, 'config.json')
 // settings), but for now, this is sufficient.
 const validateConfig = (received, expected = configSchema, path = []) => {
 	if (typeof expected === 'string') {
-		return;
+		return
 	}
 
 	for (const [key, val] of Object.entries(expected)) {
