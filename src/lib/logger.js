@@ -21,10 +21,14 @@ const createLogger = ({ label }) => winston.createLogger({
 	format: format.combine(
 		// join(),
 		format.label({ label }),
+		format.timestamp(),
 		format.colorize(),
 		format.errors({ stack: true }),
-		format.printf(({ level, label, message, stack, ...rest }) =>
-			`[${level}] [${label}]: ${message} ${JSON.stringify(rest)}${stack ? '\n' + stack : ''}`),
+		format.printf(({ timestamp, level, label, message, stack, ...rest }) => [
+			`${timestamp} [${level}] [${label}]: ${message} `,
+			JSON.stringify(rest),
+			stack ? `\n${stack}` : '',
+		].join('')),
 	),
 })
 
