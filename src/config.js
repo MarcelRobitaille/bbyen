@@ -69,12 +69,21 @@ const loadConfig = async (service, auth) => {
 			const items = res.data.items
 
 			if (!items.length) {
-				throw new Error(`Could not find channel ID using the API for '${channel}'. Please open a GitHub issue and show them this message: https://github.com/MarcelRobitaille/bbyen/issues/new`)
+				throw new Error([
+					`Could not find channel ID using the API for '${channel}'.`,
+					'Please open a GitHub issue and show them this message:',
+					'https://github.com/MarcelRobitaille/bbyen/issues/new',
+				].join(' '))
 			}
 			return items[0].id.channelId
 		}
 
-		throw new Error(`Exhausted all methods of getting the ID for channel '${channel}'. If this is a mistake, please open a GitHub issue and show them this message: https://github.com/MarcelRobitaille/bbyen/issues/new`)
+		throw new Error([
+			`Exhausted all methods of getting the ID for channel '${channel}'.`,
+			'If this is a mistake, please open a GitHub issue',
+			'and show them this message:',
+			'https://github.com/MarcelRobitaille/bbyen/issues/new',
+		].join(' '))
 	}
 
 	// Allow the channel to be the URL, which may not be the channel ID
@@ -97,7 +106,8 @@ const loadConfig = async (service, auth) => {
 	const normalizedConfig = await normalizeConfig(config)
 
 	if (!deepEqual(config, normalizedConfig)) {
-		await fs.writeFile(CONFIG_FILE, JSON.stringify(normalizedConfig, null, '\t'))
+		await fs.writeFile(
+			CONFIG_FILE, JSON.stringify(normalizedConfig, null, '\t'))
 	}
 
 	return normalizedConfig
