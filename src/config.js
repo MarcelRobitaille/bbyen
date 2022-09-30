@@ -69,6 +69,7 @@ const loadConfig = async (service, auth) => {
 			const items = res.data.items
 
 			if (!items.length) {
+				console.log(JSON.stringify(res.data))
 				throw new Error([
 					`Could not find channel ID using the API for '${channel}'.`,
 					'Please open a GitHub issue and show them this message:',
