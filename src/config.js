@@ -1,12 +1,16 @@
 const process = require('process')
+const axios = require('axios')
 const path = require('path')
 const fs = require('pn/fs')
+const JSSoup = require('jssoup').default
+const querystring = require('querystring')
 
 const deepEqual = require('./lib/deepEqual.js')
 const configSchema = require('../config.example.json')
 
 const CONFIG_DIR = process.env.CONFIG_DIR ?? path.join(__dirname, '..')
 const CONFIG_FILE = path.join(CONFIG_DIR, 'config.json')
+
 
 
 // Check that all the keys present in the example config file are also present
@@ -28,6 +32,51 @@ const validateConfig = (received, expected = configSchema, path = []) => {
 		}
 		validateConfig(received[key], val, [...path, key])
 	}
+}
+
+
+// Get the ID for a given channel URL by scraping the channel page and parsing
+// the `ytInitialData` variable
+const getChannelIdFromUrlScrape = async (url) => {
+	const response = await axios(url)
+	const soup = new JSSoup(response.data)
+	const scripts = soup.findAll('script')
+	const jsonString = scripts
+		.map(e => e.text)
+		.filter(t => t.startsWith('var ytInitialData = '))[0]
+		.replace('var ytInitialData = ', '')
+		.replace(/;$/, '')
+	const data = JSON.parse(jsonString)
+	const RSSURL = data.metadata.channelMetadataRenderer.rssUrl
+	const channelId = new URL(RSSURL).searchParams.get('channel_id')
+	return channelId
+}
+
+// Get the ID for a given channel using the YouTube data API
+// There's no official way to do this, the only way I have seen is to search for
+// the channel URL, which is kind of stupid
+// This doesn't always work, hence the above method
+const getChannelIdFromUrlAPI = async (service, auth, channel) => {
+	const res = await service.search.list({
+		auth,
+		part: 'id',
+		q: channel,
+		maxResults: 1,
+		order: 'relevance',
+		type: 'channel',
+	})
+
+	const items = res.data.items
+
+	if (!items.length) {
+		console.log(JSON.stringify(res.data))
+		throw new Error([
+			`Could not find channel ID using the API for '${channel}'.`,
+			'Please open a GitHub issue and show them this message:',
+			'https://github.com/MarcelRobitaille/bbyen/issues/new',
+		].join(' '))
+	}
+	return items[0].id.channelId
 }
 
 
@@ -57,26 +106,10 @@ const loadConfig = async (service, auth) => {
 		// If it's the custom channel URL, try to get the ID from the API
 		if (/^https:\/\/www.youtube.com\/(?:c|channel)\/.*/.test(channel)) {
 			logger.verbose('String matches URL with channel name')
-			const res = await service.search.list({
-				auth,
-				part: 'id',
-				q: channel,
-				maxResults: 1,
-				order: 'relevance',
-				type: 'channel',
-			})
-
-			const items = res.data.items
-
-			if (!items.length) {
-				console.log(JSON.stringify(res.data))
-				throw new Error([
-					`Could not find channel ID using the API for '${channel}'.`,
-					'Please open a GitHub issue and show them this message:',
-					'https://github.com/MarcelRobitaille/bbyen/issues/new',
-				].join(' '))
-			}
-			return items[0].id.channelId
+			return await Promise.any([
+				getChannelIdFromUrlAPI(service, auth, channel),
+				getChannelIdFromUrlScrape(channel),
+			])
 		}
 
 		throw new Error([
