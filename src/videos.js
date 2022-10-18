@@ -9,9 +9,7 @@ const formatDuration = duration => {
 	const hours = duration.hours === 0 ? '' : `${duration.hours}:`
 	const minutes = String(duration.minutes)
 		.padStart(duration.hours > 0 ? 2 : 0, '0') + ':'
-	const seconds = (duration.hours + duration.minutes) === 0
-		? duration.seconds
-		: String(duration.seconds).padStart(2, '0')
+	const seconds = String(duration.seconds).padStart(2, '0')
 
 	return [ hours, minutes, seconds ].join('')
 }
