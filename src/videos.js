@@ -88,6 +88,7 @@ const parseFeedsAndNotify = async ({
 						from: config.email.sendingContact,
 						to: config.email.destination,
 						subject: `${channelTitle} just uploaded a video`,
+						date: new Date(details.snippet.publishedAt),
 						html: emailTemplate({
 							channelId,
 							channelTitle,
