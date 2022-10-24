@@ -22,7 +22,7 @@ const main = async () => {
 
 		const db = await database.init(config.database)
 
-		const { transporter, emailTemplate, sendErrorEmail } =
+		const { sendVideoEmail, sendErrorEmail } =
 			await mailer.init(config.email)
 
 		// Now that emailing is set up, we can send messages on error
@@ -39,7 +39,7 @@ const main = async () => {
 				parseFeedsAndNotify,
 				parseDuration(config.timers.videos),
 				config.kickoff.videos,
-				{ db, service, auth, transporter, emailTemplate, config },
+				{ db, service, auth, sendVideoEmail, config },
 			)
 
 		} catch (err) {

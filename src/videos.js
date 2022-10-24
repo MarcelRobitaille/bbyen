@@ -19,8 +19,7 @@ const parseFeedsAndNotify = async ({
 	auth,
 	config,
 	service,
-	transporter,
-	emailTemplate,
+	sendVideoEmail,
 }) => {
 	try {
 
@@ -84,25 +83,20 @@ const parseFeedsAndNotify = async ({
 						videoTitle,
 					)
 
-					await transporter.sendMail({
-						from: config.email.sendingContact,
-						to: config.email.destination,
-						subject: `${channelTitle} just uploaded a video`,
+					await sendVideoEmail({
 						date: new Date(details.snippet.publishedAt),
-						html: emailTemplate({
-							channelId,
-							channelTitle,
-							channelThumbnail,
-							videoId,
-							videoThumbnail,
-							videoTitle,
-							isLiveStreamOrPremere,
-							videoDuration: formatDuration(videoDuration),
-							videoURL: [
-								'https://www.youtube.com/attribution_link?u=/',
-								encodeURIComponent(`watch?v=${videoId}`),
-							].join(''),
-						}),
+						channelId,
+						channelTitle,
+						channelThumbnail,
+						videoId,
+						videoThumbnail,
+						videoTitle,
+						isLiveStreamOrPremere,
+						videoDuration: formatDuration(videoDuration),
+						videoURL: [
+							'https://www.youtube.com/attribution_link?u=/',
+							encodeURIComponent(`watch?v=${videoId}`),
+						].join(''),
 					})
 
 					await db.run(SQL`

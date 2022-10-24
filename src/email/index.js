@@ -4,18 +4,30 @@ const path = require('path')
 const ejs = require('ejs')
 const nodemailer = require('nodemailer')
 
+const loadTemplate = async name =>
+	ejs.compile(await fs.readFile(
+		path.join(__dirname, name),
+		'utf-8',
+	))
+
 
 const init = async (config) => {
 	const transporter = nodemailer.createTransport(config)
-	const emailTemplate = ejs.compile(await fs.readFile(
-		path.join(__dirname, './template.ejs'),
-		'utf-8',
-	))
-	const errorTemplate = ejs.compile(await fs.readFile(
-		path.join(__dirname, './error-template.ejs'),
-		'utf-8',
-	))
+	const emailTemplate = await loadTemplate('./video-template.ejs')
+	const errorTemplate = await loadTemplate('./error-template.ejs')
 
+	// Send an email about a new upload
+	// Has the video thumbnail, title, length, etc.
+	const sendVideoEmail = ({ channelTitle, date, ...rest }) =>
+		transporter.sendMail({
+			from: config.email.sendingContact,
+			to: config.email.destination,
+			subject: `${channelTitle} just uploaded a video`,
+			date,
+			html: emailTemplate({ channelTitle, ...rest }),
+		})
+
+	// Notify about an error with the software
 	const sendErrorEmail = error =>
 		transporter.sendMail({
 			from: config.email.sendingContact,
@@ -24,7 +36,7 @@ const init = async (config) => {
 			html: errorTemplate({ error }),
 		})
 
-	return { transporter, emailTemplate, sendErrorEmail }
+	return { sendVideoEmail, sendErrorEmail }
 }
 
 module.exports = { init }
