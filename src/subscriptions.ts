@@ -53,7 +53,7 @@ export const updateSubscriptions = async (
 
 			if (Array.isArray(config.blacklistedChannelIds) &&
 					config.blacklistedChannelIds.includes(channelId)) {
-				logger.warn([
+				logger.debug([
 					'Ignoring channel in blacklist: ',
 					`${title} (${channelId})`,
 				].join(''))
@@ -62,7 +62,7 @@ export const updateSubscriptions = async (
 
 			if (Array.isArray(config.whitelistedChannelIds) &&
 					!config.whitelistedChannelIds.includes(channelId)) {
-				logger.warn([
+				logger.debug([
 					'Ignoring channel not in whitelacklist: ',
 					`${title} (${channelId})`,
 				].join(''))
