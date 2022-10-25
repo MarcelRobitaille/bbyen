@@ -46,10 +46,8 @@ async function* _genericIterator(
 	do {
 
 		// Call given method with given params
-		const res: GaxiosResponse<SubscriptionsResult | SearchResult> = await method({
-			...params,
-			pageToken: nextPageToken,
-		}, options)
+		const res: GaxiosResponse<SubscriptionsResult | SearchResult> =
+			await method({ ...params, pageToken: nextPageToken }, options)
 
 		nextPageToken = res.data.nextPageToken
 
