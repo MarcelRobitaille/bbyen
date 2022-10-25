@@ -145,7 +145,6 @@ export const parseFeedsAndNotify = async ({
 						INSERT INTO videos (videoId, channelId)
 						VALUES (${videoId}, ${channelId});
 					`)
-					return
 
 				} catch (err) {
 
@@ -164,7 +163,6 @@ export const parseFeedsAndNotify = async ({
 
 					logger.error(err)
 				}
-				return
 			}
 		}
 
