@@ -27,7 +27,7 @@ const createLogger = async ({ label }: { label: string }) => {
 			format.errors({ stack: true }),
 			format.printf(({ timestamp, level, label, message, stack, ...rest }) => [
 				`${timestamp} [${level}] [${label}]: ${message} `,
-				JSON.stringify(rest),
+				JSON.stringify(rest, null, '    '),
 				stack ? `\n${stack}` : '',
 			].join('')),
 		),
