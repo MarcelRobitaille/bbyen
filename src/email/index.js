@@ -20,8 +20,8 @@ const init = async (config) => {
 	// Has the video thumbnail, title, length, etc.
 	const sendVideoEmail = ({ channelTitle, date, ...rest }) =>
 		transporter.sendMail({
-			from: config.email.sendingContact,
-			to: config.email.destination,
+			from: config.sendingContact,
+			to: config.destination,
 			subject: `${channelTitle} just uploaded a video`,
 			date,
 			html: emailTemplate({ channelTitle, ...rest }),
@@ -30,8 +30,8 @@ const init = async (config) => {
 	// Notify about an error with the software
 	const sendErrorEmail = error =>
 		transporter.sendMail({
-			from: config.email.sendingContact,
-			to: config.email.destination,
+			from: config.sendingContact,
+			to: config.destination,
 			subject: 'BBYEN encountered and error',
 			html: errorTemplate({ error }),
 		})
