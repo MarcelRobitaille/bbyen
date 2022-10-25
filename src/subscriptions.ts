@@ -6,6 +6,7 @@ import { OAuth2Client } from 'google-auth-library'
 import { Config } from './config'
 import setupLogger from './lib/logger'
 import { subscriptionIterator } from './google/iterators'
+import findNullishValues from './lib/findNullishValues'
 
 interface ChannelDetails {
 	title: string,
@@ -38,8 +39,17 @@ export const updateSubscriptions = async (
 		const channelDetails: Map<string, ChannelDetails> = new Map()
 		for await (let sub of subscriptionIterator(service, auth)) {
 
-			const { resourceId: { channelId }, title }
-				= sub.snippet
+			const title = sub.snippet?.title
+			const channelId = sub.snippet?.resourceId?.channelId
+			const thumbnail = sub.snippet?.thumbnails?.high?.url
+
+			if (!title || !channelId || !thumbnail) {
+				const missingKeys = findNullishValues({ title, channelId, thumbnail })
+				logger.warn(
+					`Could not find all required fields in subscription`,
+					{ sub, missingKeys })
+				continue
+			}
 
 			if (Array.isArray(config.blacklistedChannelIds) &&
 					config.blacklistedChannelIds.includes(channelId)) {
@@ -65,7 +75,7 @@ export const updateSubscriptions = async (
 			updatedSubscriptions.add(channelId)
 			channelDetails.set(channelId, {
 				title,
-				thumbnail: sub.snippet.thumbnails.high.url,
+				thumbnail,
 			})
 		}
 

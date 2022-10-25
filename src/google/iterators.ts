@@ -1,6 +1,15 @@
 import dateFns from 'date-fns'
 import { youtube_v3 } from 'googleapis'
 import { OAuth2Client } from 'google-auth-library'
+import { GaxiosResponse, GaxiosPromise, MethodOptions } from 'googleapis-common'
+
+
+type SubscriptionsParams = youtube_v3.Params$Resource$Subscriptions$List
+type SubscriptionsResult = youtube_v3.Schema$SubscriptionListResponse
+type SubscriptionsItem = youtube_v3.Schema$Subscription
+type SearchParams = youtube_v3.Params$Resource$Search$List
+type SearchResult = youtube_v3.Schema$SearchListResponse
+type SearchItem = youtube_v3.Schema$SearchResult
 
 
 /**
@@ -8,25 +17,47 @@ import { OAuth2Client } from 'google-auth-library'
  * `nextPageToken === undefined`.
  */
 
-async function* _genericIterator (method: any, params: Object) {
-	let nextPageToken = null
+function _genericIterator(
+	method: (
+		params?: SubscriptionsParams,
+		options?: MethodOptions,
+	) => GaxiosPromise<SubscriptionsResult>,
+	params: SubscriptionsParams,
+	options?: MethodOptions,
+): AsyncIterable<Awaited<SubscriptionsItem>>
+function _genericIterator(
+	method: (
+		params?: SearchParams,
+		options?: MethodOptions,
+	) => GaxiosPromise<SearchResult>,
+	params: SearchParams,
+	options?: MethodOptions,
+): AsyncIterable<Awaited<SearchItem>>
+async function* _genericIterator(
+	method: (
+		params: SubscriptionsParams | SearchParams,
+		options?: MethodOptions,
+	) => GaxiosPromise<SubscriptionsResult | SearchResult>,
+	params: SubscriptionsParams | SearchParams,
+	options?: MethodOptions,
+): AsyncIterable<Awaited<SubscriptionsItem | SearchItem>> {
+	let nextPageToken = undefined
 
 	do {
 
 		// Call given method with given params
-		const res: any = await method({
+		const res: GaxiosResponse<SubscriptionsResult | SearchResult> = await method({
 			...params,
 			pageToken: nextPageToken,
-		})
+		}, options)
 
 		nextPageToken = res.data.nextPageToken
 
 		// Yield all data entries
-		yield* res.data.items
+		yield* res.data.items ?? []
 
 	} while (nextPageToken)
 }
-
 
 /**
  * Iterator for authorized account's subscriptions
@@ -35,16 +66,14 @@ async function* _genericIterator (method: any, params: Object) {
 export const subscriptionIterator = (
 	service: youtube_v3.Youtube,
 	auth: OAuth2Client,
-) => _genericIterator(
-	service.subscriptions.list.bind(service),
-	{
+) =>
+	_genericIterator(service.subscriptions.list.bind(service), {
 		auth,
-		part: 'snippet,contentDetails',
+		part: ['snippet,contentDetails'],
 		order: 'alphabetical',
 		mine: true,
 		maxResults: 50,
-	},
-)
+	})
 
 
 /**
@@ -59,15 +88,13 @@ export const channelVideoIterator = (
 	service: youtube_v3.Youtube,
 	auth: OAuth2Client,
 	channelId: string,
-) => _genericIterator(
-	service.search.list.bind(service),
-	{
+) =>
+	_genericIterator(service.search.list.bind(service), {
 		auth,
 		channelId,
 		safeSearch: 'none',
-		type: 'video',
-		part: 'id,snippet,contentDetails',
+		type: ['video'],
+		part: ['id,snippet,contentDetails'],
 		maxResults: 50,
 		publishedAfter: dateFns.sub(new Date(), DATE_THRESHOLD).toISOString(),
-	},
-)
+	})

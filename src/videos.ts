@@ -4,11 +4,12 @@ import RSSParser from 'rss-parser'
 import SQL from 'sql-template-strings'
 import { youtube_v3 } from 'googleapis'
 import { OAuth2Client } from 'google-auth-library'
+import SMTPTransport from 'nodemailer/lib/smtp-transport'
 import { parse as parseDuration, Duration } from 'duration-fns'
 
 import setupLogger from './lib/logger'
 import { ISendVideoEmail } from './email'
-import SMTPTransport from 'nodemailer/lib/smtp-transport'
+import findNullishValues from './lib/findNullishValues'
 
 const formatDuration = (duration: Duration) => {
 	const hours = duration.hours === 0 ? '' : `${duration.hours}:`
@@ -132,13 +133,13 @@ export const parseFeedsAndNotify = async ({
 							videoDuration === null ||
 							videoThumbnail === null) {
 
-						const missingKeys = Object.entries({
+						const missingKeys = findNullishValues({
 							videoDate,
 							channelTitle,
 							videoThumbnail,
 							videoTitle,
 							videoDuration,
-						}).filter(([_k, v]) => v === null).map(([k, _v]) => k)
+						})
 
 						logger.warn(
 							`Could not find all required fields for video '${videoId}'`,
