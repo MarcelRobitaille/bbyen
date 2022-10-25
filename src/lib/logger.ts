@@ -1,6 +1,7 @@
 import winston from 'winston'
 
 import { CONFIG_FILE } from '../config'
+import deepEqual from '../lib/deepEqual'
 
 const config = import(CONFIG_FILE)
 const { format, transports } = winston
@@ -27,7 +28,7 @@ const createLogger = async ({ label }: { label: string }) => {
 			format.errors({ stack: true }),
 			format.printf(({ timestamp, level, label, message, stack, ...rest }) => [
 				`${timestamp} [${level}] [${label}]: ${message} `,
-				JSON.stringify(rest, null, '    '),
+				deepEqual(rest, {}) ? '' : JSON.stringify(rest, null, '    '),
 				stack ? `\n${stack}` : '',
 			].join('')),
 		),
