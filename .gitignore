@@ -3,3 +3,6 @@ node_modules
 .env
 *.log
 database.sqlite-journal
+.google-auth-token.json
+config.json
+google-credentials.json
