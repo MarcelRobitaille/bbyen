@@ -48,6 +48,9 @@ export const init = async (config: EmailConfig) => {
 			to: config.destination,
 			subject: `${channelTitle} just uploaded a video`,
 			date,
+			headers: {
+				'Date': date.toUTCString(),
+			},
 			html: emailTemplate({ channelTitle, ...rest }),
 		})
 
