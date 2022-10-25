@@ -87,20 +87,26 @@ export const parseFeedsAndNotify = async ({
 						id: videoId,
 					}))?.data?.items?.[0]
 
+					if (details === undefined) {
+						logger.warn(`Video list is unedfined for video '${videoId}'`)
+						continue
+					}
+
 					const videoDate =
-						mapOption(s => new Date(s), details?.snippet?.publishedAt)
+						mapOption(s => new Date(s), details.snippet?.publishedAt)
 
 					const videoTitle =
-						mapOption(s => truncate(s, 70), details?.snippet?.title)
+						mapOption(s => truncate(s, 70), details.snippet?.title)
 
-					const channelTitle = details?.snippet?.channelTitle
-					const videoThumbnail =
-						details?.snippet?.thumbnails?.maxres?.url ??
-						details?.snippet?.thumbnails?.standard?.url ??
-						details?.snippet?.thumbnails?.high?.url
+					const channelTitle = details.snippet?.channelTitle ?? null
+					const videoThumbnail = (
+						details.snippet?.thumbnails?.maxres?.url ??
+						details.snippet?.thumbnails?.standard?.url ??
+						details.snippet?.thumbnails?.high?.url
+					) ?? null
 
 					const videoDuration =
-						mapOption(parseDuration, details?.contentDetails?.duration)
+						mapOption(parseDuration, details.contentDetails?.duration)
 
 					const isLiveStreamOrPremere =
 						details && 'liveStreamingDetails' in details
@@ -118,10 +124,26 @@ export const parseFeedsAndNotify = async ({
 						videoTitle,
 					)
 
-					if (!(videoDate && channelTitle && videoThumbnail && videoTitle &&
-								isLiveStreamOrPremere && videoDuration)) {
-						logger.warn('Could not find all required fields for video')
-						logger.warn(details)
+					// Not really a better way to do this in TypeScript
+					// https://stackoverflow.com/questions/57928920/typescript-narrowing-of-keys-in-objects-when-passed-to-function
+					if (videoDate === null ||
+							videoTitle === null ||
+							channelTitle === null ||
+							videoDuration === null ||
+							videoThumbnail === null) {
+
+						const missingKeys = Object.entries({
+							videoDate,
+							channelTitle,
+							videoThumbnail,
+							videoTitle,
+							videoDuration,
+						}).filter(([_k, v]) => v === null).map(([k, _v]) => k)
+
+						logger.warn(
+							`Could not find all required fields for video '${videoId}'`,
+							{ details, missingKeys },
+						)
 						continue
 					}
 
