@@ -3,8 +3,12 @@ import path from 'path'
 
 import ejs from 'ejs'
 import nodemailer from 'nodemailer'
+import SMTPTransport from 'nodemailer/lib/smtp-transport'
 
 import { EmailConfig } from '../config'
+
+export type SendVideoEmail =
+	(props: ISendVideoEmail) => Promise<SMTPTransport.SentMessageInfo>
 
 const loadTemplate = async (name: string) =>
 	ejs.compile(await fs.readFile(
