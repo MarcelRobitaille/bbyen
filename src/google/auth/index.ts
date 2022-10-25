@@ -1,34 +1,31 @@
-const fs = require('pn/fs')
-const path = require('path')
-const http = require('http')
-const parseURL = require('url').parse
+import fs from 'fs/promises'
+import path from 'path'
+import http from 'http'
+import { parse as parseURL } from 'url'
 
-const open = require('open')
-const { OAuth2Client } = require('google-auth-library')
+import open from 'open'
+import { OAuth2Client } from 'google-auth-library'
 
-const readline = require('./readline.js')
+import readline from './readline'
 
-const logger = require('../../lib/logger')({ label: 'google-auth' })
-const { CONFIG_DIR, CONFIG_FILE } = require('../../config.js')
-const config = require(CONFIG_FILE)
-
-const credentials = require(path.join(CONFIG_DIR, 'google-credentials.json'))
+import setupLogger from '../../lib/logger'
+import { CONFIG_DIR, CONFIG_FILE } from '../../config'
 
 const SCOPES = [ 'https://www.googleapis.com/auth/youtube.readonly' ]
 const TOKEN_FILE = path.join(CONFIG_DIR, '.google-auth-token.json')
 
+const config = import(CONFIG_FILE)
+const credentials = import(path.join(CONFIG_DIR, 'google-credentials.json'))
 
 /**
  * Store given token to `TOKEN_FILE`
- *
- * @param {Object} token Auth token to store
  */
 
-const storeToken = token => {
+const storeToken = async (token: string) => {
 	const file = TOKEN_FILE
 	const dir = path.dirname(file)
 
-	return fs.mkdir(dir)
+	return await fs.mkdir(dir)
 		.catch(err => { if (err.code !== 'EEXIST') throw err })
 		.then(() => fs.writeFile(file, JSON.stringify(token)))
 }
@@ -38,13 +35,10 @@ const storeToken = token => {
  * Generate new auth token
  *
  * Authorize by printing a URL and pasting back a code
- *
- * @async
- * @param {OAuth2Client} oauth2Client Client to generate token for
- * @returns {Object} Google auth token
  */
 
-const genAuthToken = async oauth2Client => {
+const genAuthToken = async (oauth2Client: any) => {
+	const logger = await setupLogger({ label: 'google-auth' })
 
 	const authUrl = oauth2Client.generateAuthUrl({
 		access_type: 'offline',
@@ -57,10 +51,10 @@ const genAuthToken = async oauth2Client => {
 
 	// Set up a webserver to automatically get the code after Google redirects to
 	// localhost
-	const automatedMethod = new Promise((resolve, reject) => {
-		const handler = async (req, res) => {
+	const automatedMethod = new Promise(async (resolve, reject) => {
+		const server = http.createServer(async (req, res) => {
 			logger.debug(`[${req.method}] ${req.url}`)
-			if (!req.url.startsWith('/authorization_code')) {
+			if (!req.url?.startsWith('/authorization_code')) {
 				logger.info(`Ignoring request to ${req.url}`)
 				res.writeHead(404)
 				return
@@ -89,9 +83,8 @@ const genAuthToken = async oauth2Client => {
 				reject(err)
 			}
 			server.close()
-		}
-		const server = http.createServer(handler)
-		server.listen(config.port)
+		})
+		server.listen((await config).port)
 	})
 
 	// Also support copy/pasting the code if the automatic method does not work
@@ -118,16 +111,12 @@ const genAuthToken = async oauth2Client => {
 /**
  * Get Google tokens, first trying to read `TOKEN_FILE` and falling back to
  * generating new ones
- *
- * @async
- * @param {OAuth2Client} oauth2Client Google client to get tokens for
- * @returns {Object} Google tokens
  */
 
-const getToken = async oauth2Client => {
+const getToken = async (oauth2Client: any) => {
 	try {
-
-		return await fs.readFile(TOKEN_FILE).then(JSON.parse)
+		const contents = await fs.readFile(TOKEN_FILE)
+		return JSON.parse(contents.toString())
 
 	} catch (err) {
 
@@ -140,16 +129,13 @@ const getToken = async oauth2Client => {
 /**
  * Create Google OAuth2Client first trying to read `TOKEN_FILE` and falling
  * back to generating new tokens
- *
- * @async
- * @returns {OAuth2Client} Google OAuth2Client
  */
 
 const authorize = async () => {
 	const oauth2Client = new OAuth2Client(
-		credentials.installed.client_id,
-		credentials.installed.client_secret,
-		`http://localhost:${config.port}/authorization_code`,
+		(await credentials).installed.client_id,
+		(await credentials).installed.client_secret,
+		`http://localhost:${(await config).port}/authorization_code`,
 	)
 
 	oauth2Client.setCredentials(await getToken(oauth2Client))
@@ -157,4 +143,4 @@ const authorize = async () => {
 	return oauth2Client
 }
 
-module.exports = authorize
+export default authorize

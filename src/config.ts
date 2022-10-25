@@ -1,23 +1,62 @@
-const process = require('process')
-const axios = require('axios')
-const path = require('path')
-const fs = require('pn/fs')
-const JSSoup = require('jssoup').default
-const querystring = require('querystring')
+import process from 'process'
+import axios from 'axios'
+import path from 'path'
+import fs from 'fs/promises'
+import JSSoup from 'jssoup'
+import { youtube_v3 } from 'googleapis'
+import { OAuth2Client } from 'google-auth-library'
 
-const deepEqual = require('./lib/deepEqual.js')
-const configSchema = require('../config.example.json')
+import deepEqual from './lib/deepEqual'
+import setupLogger from './lib/logger'
+import configSchema from '../config.example.json'
 
-const CONFIG_DIR = process.env.CONFIG_DIR ?? path.join(__dirname, '..')
-const CONFIG_FILE = path.join(CONFIG_DIR, 'config.json')
+export const CONFIG_DIR = process.env.CONFIG_DIR ?? path.join(__dirname, '..')
+export const CONFIG_FILE = path.join(CONFIG_DIR, 'config.json')
 
+export interface EmailConfig {
+	host: string,
+	port: number,
+	secure: boolean,
+	auth: {
+		user: string,
+		pass: string,
+	},
+	sendingContact: string,
+	destination: string,
+}
 
+export interface Config {
+	email: EmailConfig,
+	port: number,
+	database: {
+		filename: string,
+	},
+	timers: {
+		subscriptions: "2 days",
+		videos: "20 minutes"
+	},
+	kickoff: {
+		subscriptions: boolean,
+		videos: boolean,
+	},
+	logging: {
+		level: "error" | "warn" | "info" | "http" | "verbose" | "debug" | "silly",
+		stackTraceLimit: number,
+		emailOnError: boolean,
+	},
+	whitelistedChannelIds: string[],
+	blacklistedChannelIds: string[],
+}
 
 // Check that all the keys present in the example config file are also present
 // in the supplied config file
 // Eventually, we might need something more sophisticated (i.e. optional
 // settings), but for now, this is sufficient.
-const validateConfig = (received, expected = configSchema, path = []) => {
+const validateConfig = (
+	received: any,
+	expected: any = configSchema,
+	path: string[] = [],
+) => {
 	if (typeof expected === 'string') {
 		return
 	}
@@ -37,7 +76,7 @@ const validateConfig = (received, expected = configSchema, path = []) => {
 
 // Get the ID for a given channel URL by scraping the channel page and parsing
 // the `ytInitialData` variable
-const getChannelIdFromUrlScrape = async (url) => {
+const getChannelIdFromUrlScrape = async (url: string) => {
 	const response = await axios(url)
 	const soup = new JSSoup(response.data)
 	const scripts = soup.findAll('script')
@@ -56,19 +95,23 @@ const getChannelIdFromUrlScrape = async (url) => {
 // There's no official way to do this, the only way I have seen is to search for
 // the channel URL, which is kind of stupid
 // This doesn't always work, hence the above method
-const getChannelIdFromUrlAPI = async (service, auth, channel) => {
+const getChannelIdFromUrlAPI = async (
+	service: youtube_v3.Youtube,
+	auth: OAuth2Client,
+	channel: string,
+) => {
 	const res = await service.search.list({
 		auth,
-		part: 'id',
+		part: ['id'],
 		q: channel,
 		maxResults: 1,
 		order: 'relevance',
-		type: 'channel',
+		type: ['channel'],
 	})
 
 	const items = res.data.items
 
-	if (!items.length) {
+	if (!items?.length) {
 		console.log(JSON.stringify(res.data))
 		throw new Error([
 			`Could not find channel ID using the API for '${channel}'.`,
@@ -76,16 +119,19 @@ const getChannelIdFromUrlAPI = async (service, auth, channel) => {
 			'https://github.com/MarcelRobitaille/bbyen/issues/new',
 		].join(' '))
 	}
-	return items[0].id.channelId
+	return items[0].id?.channelId
 }
 
 
-const loadConfig = async (service, auth) => {
+export const loadConfig = async (
+	service: youtube_v3.Youtube,
+	auth: OAuth2Client,
+): Promise<Config> => {
 	// This has to come here to avoid dependency loop
-	const logger = require('./lib/logger')({ label: 'config' })
+	const logger = await setupLogger({ label: 'config' })
 
 	// Get the channel ID from the URL using the data API
-	const normalizeChannel = async channel => {
+	const normalizeChannel = async (channel: string) => {
 		logger.verbose(`Normalizing channel string '${channel}'`)
 
 		// If the string is already just the channel ID
@@ -125,7 +171,7 @@ const loadConfig = async (service, auth) => {
 		whitelistedChannelIds,
 		blacklistedChannelIds,
 		...config
-	}) => ({
+	}: Config) => ({
 		...config,
 		whitelistedChannelIds: whitelistedChannelIds
 			? await Promise.all(whitelistedChannelIds.map(normalizeChannel))
@@ -135,7 +181,7 @@ const loadConfig = async (service, auth) => {
 			: undefined,
 	})
 
-	const config = JSON.parse(await fs.readFile(CONFIG_FILE))
+	const config = JSON.parse((await fs.readFile(CONFIG_FILE)).toString())
 	validateConfig(config)
 	const normalizedConfig = await normalizeConfig(config)
 
@@ -144,7 +190,5 @@ const loadConfig = async (service, auth) => {
 			CONFIG_FILE, JSON.stringify(normalizedConfig, null, '\t'))
 	}
 
-	return normalizedConfig
+	return normalizedConfig as Config
 }
-
-module.exports = { loadConfig, CONFIG_DIR, CONFIG_FILE }

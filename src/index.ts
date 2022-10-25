@@ -1,18 +1,19 @@
-const { google } = require('googleapis')
-const parseDuration = require('parse-duration')
+import { google } from 'googleapis'
+import parseDuration from 'parse-duration'
 
-const { loadConfig } = require('./config.js')
-const database = require('./database')
-const authorize = require('./google/auth')
-const mailer = require('./email')
-const { parseFeedsAndNotify } = require('./videos')
-const { updateSubscriptions } = require('./subscriptions')
-const setIntervalInstant = require('./lib/setIntervalInstant')
-
-const logger = require('./lib/logger')({ label: 'main' })
-
+import { loadConfig } from './config'
+import * as database from './database'
+import authorize from './google/auth'
+import * as mailer from './email'
+import { parseFeedsAndNotify } from './videos'
+import { updateSubscriptions } from './subscriptions'
+import setIntervalInstant from './lib/setIntervalInstant'
+import { ISendErrorEmail } from './email'
+import setupLogger from './lib/logger'
 
 const main = async () => {
+	const logger = await setupLogger({ label: 'main' })
+
 	try {
 
 		const service = google.youtube('v3')
@@ -45,7 +46,7 @@ const main = async () => {
 		} catch (err) {
 			try {
 				if (config.logging.emailOnError) {
-					await sendErrorEmail(err)
+					await sendErrorEmail(err as ISendErrorEmail)
 				}
 			} catch (err) {
 				logger.warn(

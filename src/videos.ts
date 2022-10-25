@@ -1,11 +1,16 @@
-const truncate = require('truncate')
-const RSSParser = require('rss-parser')
-const SQL = require('sql-template-strings')
-const { parse: parseDuration } = require('duration-fns')
+import sqlite from 'sqlite'
+import truncate from 'truncate'
+import RSSParser from 'rss-parser'
+import SQL from 'sql-template-strings'
+import { youtube_v3 } from 'googleapis'
+import { OAuth2Client } from 'google-auth-library'
+import { parse as parseDuration, Duration } from 'duration-fns'
 
-const logger = require('./lib/logger')({ label: 'videos' })
+import setupLogger from './lib/logger'
+import { ISendVideoEmail } from './email'
+import SMTPTransport from 'nodemailer/lib/smtp-transport'
 
-const formatDuration = duration => {
+const formatDuration = (duration: Duration) => {
 	const hours = duration.hours === 0 ? '' : `${duration.hours}:`
 	const minutes = String(duration.minutes)
 		.padStart(duration.hours > 0 ? 2 : 0, '0') + ':'
@@ -14,13 +19,34 @@ const formatDuration = duration => {
 	return [ hours, minutes, seconds ].join('')
 }
 
-const parseFeedsAndNotify = async ({
+// Helper to deal with YouTube data API giving back a bunch of options
+// Works like Rust Option<T>.map
+const mapOption = <Type>(
+	fn: (arg: string) => Type,
+		value: string | null | undefined,
+): Type | null => {
+	if (!value) {
+		return null
+	}
+	return fn(value)
+}
+
+interface IParseFeedsAndNotify {
+	db: sqlite.Database,
+	auth: OAuth2Client,
+	service: youtube_v3.Youtube,
+	// TODO
+	sendVideoEmail:
+		(props: ISendVideoEmail) => Promise<SMTPTransport.SentMessageInfo>,
+}
+export const parseFeedsAndNotify = async ({
 	db,
 	auth,
-	config,
 	service,
 	sendVideoEmail,
-}) => {
+}: IParseFeedsAndNotify) => {
+	const logger = await setupLogger({ label: 'videos' })
+
 	try {
 
 		logger.info('Checking for new videos...')
@@ -57,24 +83,33 @@ const parseFeedsAndNotify = async ({
 
 					const details = (await service.videos.list({
 						auth,
-						part: 'contentDetails,snippet,liveStreamingDetails',
+						part: ['contentDetails,snippet,liveStreamingDetails'],
 						id: videoId,
-					})).data.items[0]
+					}))?.data?.items?.[0]
 
-					const videoTitle = truncate(details.snippet.title, 70)
-					const { channelTitle } = details.snippet
-					const { url: videoThumbnail } =
-						details.snippet.thumbnails.maxres ??
-						details.snippet.thumbnails.standard ??
-						details.snippet.thumbnails.high
+					const videoDate =
+						mapOption(s => new Date(s), details?.snippet?.publishedAt)
+
+					const videoTitle =
+						mapOption(s => truncate(s, 70), details?.snippet?.title)
+
+					const channelTitle = details?.snippet?.channelTitle
+					const videoThumbnail =
+						details?.snippet?.thumbnails?.maxres?.url ??
+						details?.snippet?.thumbnails?.standard?.url ??
+						details?.snippet?.thumbnails?.high?.url
+
 					const videoDuration =
-						parseDuration(details.contentDetails.duration)
+						mapOption(parseDuration, details?.contentDetails?.duration)
 
 					const isLiveStreamOrPremere =
-						'liveStreamingDetails' in details
+						details && 'liveStreamingDetails' in details
 
+					// Only send the notification once the livestream ended
+					// I prefer to watch the VOD later
+					// TODO: Consider making this configurable
 					if (isLiveStreamOrPremere &&
-							!details.liveStreamingDetails.actualEndTime) {
+							!details.liveStreamingDetails?.actualEndTime) {
 						continue
 					}
 
@@ -83,8 +118,15 @@ const parseFeedsAndNotify = async ({
 						videoTitle,
 					)
 
+					if (!(videoDate && channelTitle && videoThumbnail && videoTitle &&
+								isLiveStreamOrPremere && videoDuration)) {
+						logger.warn('Could not find all required fields for video')
+						logger.warn(details)
+						continue
+					}
+
 					await sendVideoEmail({
-						date: new Date(details.snippet.publishedAt),
+						date: videoDate,
 						channelId,
 						channelTitle,
 						channelThumbnail,
@@ -103,6 +145,7 @@ const parseFeedsAndNotify = async ({
 						INSERT INTO videos (videoId, channelId)
 						VALUES (${videoId}, ${channelId});
 					`)
+					return
 
 				} catch (err) {
 
@@ -111,7 +154,7 @@ const parseFeedsAndNotify = async ({
 						550,
 						// Gmail uses these
 						421, 454,
-					].includes(err.responseCode)) {
+					].includes((err as { responseCode: number }).responseCode)) {
 						logger.warn(
 							'Email quota has run out.',
 							'Abandoning, will retry on next timer trigger.',
@@ -121,6 +164,7 @@ const parseFeedsAndNotify = async ({
 
 					logger.error(err)
 				}
+				return
 			}
 		}
 
@@ -130,5 +174,3 @@ const parseFeedsAndNotify = async ({
 		logger.error(err)
 	}
 }
-
-module.exports = { parseFeedsAndNotify }

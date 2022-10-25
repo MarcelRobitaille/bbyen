@@ -1,24 +1,44 @@
-const fs = require('pn/fs')
-const path = require('path')
+import fs from 'fs/promises'
+import path from 'path'
 
-const ejs = require('ejs')
-const nodemailer = require('nodemailer')
+import ejs from 'ejs'
+import nodemailer from 'nodemailer'
 
-const loadTemplate = async name =>
+import { EmailConfig } from '../config'
+
+const loadTemplate = async (name: string) =>
 	ejs.compile(await fs.readFile(
 		path.join(__dirname, name),
 		'utf-8',
 	))
 
 
-const init = async (config) => {
+export interface ISendVideoEmail {
+	channelId: string,
+	channelThumbnail: string,
+	channelTitle: string,
+	date: Date,
+	isLiveStreamOrPremere: boolean,
+	videoDuration: string,
+	videoId: string,
+	videoThumbnail: string,
+	videoTitle: string,
+	videoURL: string,
+}
+
+export interface ISendErrorEmail {
+	stack: string,
+	message: string,
+}
+
+export const init = async (config: EmailConfig) => {
 	const transporter = nodemailer.createTransport(config)
 	const emailTemplate = await loadTemplate('./video-template.ejs')
 	const errorTemplate = await loadTemplate('./error-template.ejs')
 
 	// Send an email about a new upload
 	// Has the video thumbnail, title, length, etc.
-	const sendVideoEmail = ({ channelTitle, date, ...rest }) =>
+	const sendVideoEmail = ({ channelTitle, date, ...rest }: ISendVideoEmail) =>
 		transporter.sendMail({
 			from: config.sendingContact,
 			to: config.destination,
@@ -28,7 +48,7 @@ const init = async (config) => {
 		})
 
 	// Notify about an error with the software
-	const sendErrorEmail = error =>
+	const sendErrorEmail = (error: ISendErrorEmail) =>
 		transporter.sendMail({
 			from: config.sendingContact,
 			to: config.destination,
@@ -38,5 +58,3 @@ const init = async (config) => {
 
 	return { sendVideoEmail, sendErrorEmail }
 }
-
-module.exports = { init }

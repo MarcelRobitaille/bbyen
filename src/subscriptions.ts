@@ -1,10 +1,28 @@
-const SQL = require('sql-template-strings')
+import sqlite from 'sqlite'
+import SQL from 'sql-template-strings'
+import { youtube_v3 } from 'googleapis'
+import { OAuth2Client } from 'google-auth-library'
 
-const { subscriptionIterator } = require('./google/iterators')
-const logger = require('./lib/logger')({ label: 'subscriptions' })
+import { Config } from './config'
+import setupLogger from './lib/logger'
+import { subscriptionIterator } from './google/iterators'
 
+interface ChannelDetails {
+	title: string,
+	thumbnail: string,
+}
 
-const updateSubscriptions = async ({ db, service, auth, config }) => {
+interface IUpdateSubscriptions {
+	db: sqlite.Database,
+	service: youtube_v3.Youtube,
+	auth: OAuth2Client,
+	config: Config,
+}
+export const updateSubscriptions = async (
+	{ db, service, auth, config }: IUpdateSubscriptions
+) => {
+	const logger = await setupLogger({ label: 'subscriptions' })
+
 	try {
 
 		logger.info('Checking subscriptions...')
@@ -16,8 +34,8 @@ const updateSubscriptions = async ({ db, service, auth, config }) => {
 		)
 
 		// Get updated list of subs using Google api
-		const updatedSubscriptions = new Set()
-		const channelDetails = new Map()
+		const updatedSubscriptions: Set<string> = new Set()
+		const channelDetails: Map<string, ChannelDetails> = new Map()
 		for await (let sub of subscriptionIterator(service, auth)) {
 
 			const { resourceId: { channelId }, title }
@@ -45,10 +63,10 @@ const updateSubscriptions = async ({ db, service, auth, config }) => {
 			logger.debug(JSON.stringify(sub.contentDetails, null, '	'))
 
 			updatedSubscriptions.add(channelId)
-			channelDetails[channelId] = {
+			channelDetails.set(channelId, {
 				title,
 				thumbnail: sub.snippet.thumbnails.high.url,
-			}
+			})
 		}
 
 		// Compute difference of both sets to determine new / removed subs
@@ -74,7 +92,17 @@ const updateSubscriptions = async ({ db, service, auth, config }) => {
 			`)
 
 			for (let channelId of newSubscriptions.values()) {
-				const { title, thumbnail } = channelDetails[channelId]
+				const res = channelDetails.get(channelId)
+
+				if (!res) {
+					logger.warn([
+						`Could not find channel ID ${channelId} in channelDetails.`,
+						'Skipping.',
+					].join(' '))
+					continue
+				}
+
+				const { title, thumbnail } = res
 
 				logger.info(`New subscription: ${title}`)
 
@@ -107,7 +135,7 @@ const updateSubscriptions = async ({ db, service, auth, config }) => {
 	} catch (err) {
 
 		// Avoid printing huge error object for quota issues
-		if (err?.errors?.[0]?.reason) {
+		if ((err as any)?.errors?.[0]?.reason) {
 			logger.warn('Quota up. Failed to update subscriptions.')
 
 			return
@@ -116,5 +144,3 @@ const updateSubscriptions = async ({ db, service, auth, config }) => {
 		logger.error(err)
 	}
 }
-
-module.exports = { updateSubscriptions }

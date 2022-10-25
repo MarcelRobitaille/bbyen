@@ -1,18 +1,15 @@
-const path = require('path')
+import path from 'path'
 
-const sqlite = require('sqlite')
-const sqlite3 = require('sqlite3')
-const SQL = require('sql-template-strings')
+import * as sqlite from 'sqlite'
+import sqlite3 from 'sqlite3'
+import SQL from 'sql-template-strings'
 
 
 /**
  * Set up database
- *
- * @async
- * @returns sqlite database instance
  */
 
-const init = async ({ filename }) => {
+export const init = async ({ filename }: { filename: string }) => {
 	const db = await sqlite.open({
 		filename: path.join(__dirname, '../', filename),
 		driver: sqlite3.Database,
@@ -38,5 +35,3 @@ const init = async ({ filename }) => {
 
 	return db
 }
-
-module.exports = { init }
