@@ -110,7 +110,7 @@ it is mandatory to configure certain values and to set up Google API credentials
 ### Bare Metal
 
 ```
-node src/index.js
+npm start
 ```
 
 ### Docker
