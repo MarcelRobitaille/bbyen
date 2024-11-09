@@ -1,7 +1,6 @@
 import winston from 'winston'
 
 import { CONFIG_FILE } from '../config'
-import deepEqual from '../lib/deepEqual'
 
 const config = import(CONFIG_FILE)
 const { format, transports } = winston
@@ -10,6 +9,8 @@ const { format, transports } = winston
 // 	...info,
 // 	message: [ info.message, ...(info[Symbol.for('splat')] ?? []) ].join(' '),
 // }))
+
+const isObjectEmpty = (object: Object) => Object.keys(object).length === 0
 
 const createLogger = async ({ label }: { label: string }) => {
 	Error.stackTraceLimit = (await config).logging.stackTraceLimit
@@ -28,7 +29,7 @@ const createLogger = async ({ label }: { label: string }) => {
 			format.errors({ stack: true }),
 			format.printf(({ timestamp, level, label, message, stack, ...rest }) => [
 				`${timestamp} [${level}] [${label}]: ${message} `,
-				deepEqual(rest, {}) ? '' : JSON.stringify(rest, null, '    '),
+				isObjectEmpty(rest) ? '' : JSON.stringify(rest, null, '    '),
 				stack ? `\n${stack}` : '',
 			].join('')),
 		),

@@ -58,8 +58,6 @@ const getChannelsVideos = async ({
 }: IGetChannelsVideos) => {
 	const { channelId, channelTitle, channelThumbnail } = channel
 
-	logger.verbose(`Checking channel ${channelTitle} (${channelId})`)
-
 	const videosSent = new Set((await db.all(SQL`
 		SELECT videoId FROM videos WHERE channelId=${channelId};
 	`)).map(v => v.videoId))
@@ -208,7 +206,11 @@ export const parseFeedsAndNotify = async (
 			SELECT channelId, channelTitle, channelThumbnail FROM subscriptions;
 		`)
 
-		for (const channel of channels) {
+		for (const [i, channel] of channels.entries()) {
+			logger.verbose([
+				`${i}/${channels.length}`,
+				`Checking channel ${channel.channelTitle} (${channel.channelId})`,
+			].join(' '))
 			await getChannelsVideos({ channel, parser, logger, db, ...rest })
 		}
 
