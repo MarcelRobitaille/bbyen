@@ -69,7 +69,7 @@ export const updateSubscriptions = async (
 				continue
 			}
 
-			logger.verbose(title, channelId)
+			logger.verbose(`${title} (${channelId})`)
 			logger.debug(JSON.stringify(sub.contentDetails, null, '	'))
 
 			updatedSubscriptions.add(channelId)

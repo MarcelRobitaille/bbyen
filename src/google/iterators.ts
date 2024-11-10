@@ -3,6 +3,8 @@ import { youtube_v3 } from 'googleapis'
 import { OAuth2Client } from 'google-auth-library'
 import { GaxiosResponse, GaxiosPromise, MethodOptions } from 'googleapis-common'
 
+import setupLogger from '../lib/logger'
+
 
 type SubscriptionsParams = youtube_v3.Params$Resource$Subscriptions$List
 type SubscriptionsResult = youtube_v3.Schema$SubscriptionListResponse
@@ -43,11 +45,26 @@ async function* _genericIterator(
 ): AsyncIterable<Awaited<SubscriptionsItem | SearchItem>> {
 	let nextPageToken = undefined
 
+	const logger = await setupLogger({ label: 'iterator' })
+	let itemsSeen = 0
+
 	do {
 
 		// Call given method with given params
 		const res: GaxiosResponse<SubscriptionsResult | SearchResult> =
 			await method({ ...params, pageToken: nextPageToken }, options)
+
+		itemsSeen += res.data.items?.length ?? 0
+
+		logger.verbose('Got page of data', {
+			resultsPerPage: res.data.pageInfo?.resultsPerPage,
+			totalResults: res.data.pageInfo?.totalResults,
+			itemsSeen,
+			currentPageToken: nextPageToken,
+			nextPageToken: res.data.nextPageToken,
+		})
+
+		logger.debug(JSON.stringify({ options, res, nextPageToken }))
 
 		nextPageToken = res.data.nextPageToken
 
