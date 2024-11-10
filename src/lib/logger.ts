@@ -28,7 +28,6 @@ const createLogger = async ({ label }: { label: string }) => {
 			format.colorize(),
 			format.errors({ stack: true }),
 			format.printf(({ timestamp, level, label, message, stack, ...rest }) => {
-				console.log(rest)
 				return [
 					`${timestamp} [${level}] [${label}]: ${message} `,
 					isObjectEmpty(rest) ? '' : JSON.stringify(rest, null, '    '),

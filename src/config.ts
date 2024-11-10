@@ -136,7 +136,6 @@ export const loadConfig = async (
 
 		// If the string is already just the channel ID
 		if (/^[0-9a-zA-Z_-]{24}$/.test(channel)) {
-			logger.verbose('String matches ID')
 			return channel
 		}
 

@@ -208,7 +208,7 @@ export const parseFeedsAndNotify = async (
 
 		for (const [i, channel] of channels.entries()) {
 			logger.verbose([
-				`${i}/${channels.length}`,
+				`${i + 1}/${channels.length}`,
 				`Checking channel ${channel.channelTitle} (${channel.channelId})`,
 			].join(' '))
 			await getChannelsVideos({ channel, parser, logger, db, ...rest })
