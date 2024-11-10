@@ -24,7 +24,7 @@ interface IUpdateSubscriptions {
 // Read all known subs from the database
 const getSavedSubscriptions = async (db: sqlite.Database) =>
 		new Set<string>(
-			(await db.all(SQL`SELECT channelId FROM subscriptions;`))
+			(await db.all(SQL`SELECT channelId FROM subscriptions WHERE deleted=0;`))
 				.map(sub => sub.channelId)
 		)
 
@@ -138,12 +138,14 @@ export const updateSubscriptionsFromAPI = async (
 
 	// Add any new subscriptions to the database
 	await insertNewSubscriptions(
-		db, logger, newSubscriptions.values(), channelDetails)
+		db, logger, Array.from(newSubscriptions), channelDetails)
 
 	// Delete any removed subscriptions (unsubscriptions) from the database
 	{
 		const stmt = await db.prepare(SQL`
-			DELETE FROM subscriptions WHERE channelId=?;
+			UPDATE subscriptions
+			SET deleted=1
+			WHERE channelId=?;
 		`)
 
 		for (let channelId of removedSubscriptions.values()) {
