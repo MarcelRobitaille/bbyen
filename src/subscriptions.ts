@@ -64,6 +64,31 @@ const insertNewSubscriptions = async (
 	await stmt.finalize()
 }
 
+// Delete any removed subscriptions (unsubscriptions) from the database
+const removeDeletedSubscriptions = async (
+	db: sqlite.Database,
+	logger: winston.Logger,
+	removedSubscriptions: Iterable<string>,
+) => {
+	const stmt = await db.prepare(SQL`
+		UPDATE subscriptions
+		SET deleted=1
+		WHERE channelId=?;
+	`)
+
+	for (let channelId of removedSubscriptions) {
+		const { channelTitle } = await db.get(SQL`
+			SELECT channelTitle
+			FROM subscriptions
+			WHERE channelId=${channelId};
+		`)
+		await stmt.run(channelId)
+
+		logger.info(`Removed subscription: ${channelTitle}`)
+	}
+	await stmt.finalize()
+}
+
 function* chunks<T>(arr: T[], n: number) {
 	for (let i = 0; i < arr.length; i += n) {
 		yield arr.slice(i, i + n)
@@ -140,26 +165,7 @@ export const updateSubscriptionsFromAPI = async (
 	await insertNewSubscriptions(
 		db, logger, Array.from(newSubscriptions), channelDetails)
 
-	// Delete any removed subscriptions (unsubscriptions) from the database
-	{
-		const stmt = await db.prepare(SQL`
-			UPDATE subscriptions
-			SET deleted=1
-			WHERE channelId=?;
-		`)
-
-		for (let channelId of removedSubscriptions.values()) {
-			const { channelTitle } = await db.get(SQL`
-				SELECT channelTitle
-				FROM subscriptions
-				WHERE channelId=${channelId};
-			`)
-			await stmt.run(channelId)
-
-			logger.info(`Removed subscription: ${channelTitle}`)
-		}
-		await stmt.finalize()
-	}
+	await removeDeletedSubscriptions(db, logger, removedSubscriptions.values())
 
 	logger.info('Done checking subscriptions...')
 }
@@ -212,7 +218,13 @@ export const updateSubscriptionsFromWhitelist = async (
 		}
 	}
 
+	const removedSubscriptions = new Set(
+		[...savedSubscriptions]
+			.filter(sub => !whitelistedChannelIds.has(sub))
+	)
+
 	await insertNewSubscriptions(db, logger, newlyWhitelisted, channelDetails)
+	await removeDeletedSubscriptions(db, logger, removedSubscriptions.values())
 }
 
 export const updateSubscriptions = async (args: IUpdateSubscriptions) => {
