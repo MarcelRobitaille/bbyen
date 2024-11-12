@@ -203,7 +203,9 @@ export const parseFeedsAndNotify = async (
 		})
 
 		const channels: Channel[] = await db.all(SQL`
-			SELECT channelId, channelTitle, channelThumbnail FROM subscriptions;
+			SELECT channelId, channelTitle, channelThumbnail
+			FROM subscriptions
+			WHERE deleted=0;
 		`)
 
 		for (const [i, channel] of channels.entries()) {
