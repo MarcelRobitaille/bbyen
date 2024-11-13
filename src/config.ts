@@ -149,7 +149,7 @@ export const loadConfig = async (
 		}
 
 		// If it's the custom channel URL, try to get the ID from the API
-		if (/^https:\/\/www.youtube.com\/(?:c|channel)\/.*/.test(channel)) {
+		if (/^https:\/\/www.youtube.com\/(?:c\/|channel\/|)[^\/]*/.test(channel)) {
 			logger.verbose('String matches URL with channel name')
 			return await Promise.any([
 				getChannelIdFromUrlAPI(service, auth, channel),
