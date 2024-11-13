@@ -35,7 +35,18 @@ const insertNewSubscriptions = async (
 	newSubscriptions: string[],
 	channelDetails: Map<string, ChannelDetails>,
 ) => {
-	const stmt = await db.prepare(SQL`
+
+	// Prevent double insertion
+	const stmtClean = await db.prepare(SQL`
+		DELETE FROM subscriptions WHERE channelId=?;`)
+
+	for (const channelId of newSubscriptions) {
+		await stmtClean.run(channelId);
+	}
+
+	await stmtClean.finalize()
+
+	const stmtInsert = await db.prepare(SQL`
 		INSERT INTO subscriptions (
 			channelId,
 			channelTitle,
@@ -59,9 +70,10 @@ const insertNewSubscriptions = async (
 
 		logger.info(`${i+1}/${newSubscriptions.length} New subscription: ${title}`)
 
-		await stmt.run(channelId, title, thumbnail)
+		await stmtInsert.run(channelId, title, thumbnail)
 	}
-	await stmt.finalize()
+
+	await stmtInsert.finalize()
 }
 
 // Delete any removed subscriptions (unsubscriptions) from the database
