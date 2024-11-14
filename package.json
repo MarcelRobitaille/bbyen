@@ -4,7 +4,7 @@
   "description": "Bring Back YouTube Email Notifications!",
   "main": "src/index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "vitest",
     "start": "ts-node --transpile-only src/index.ts",
     "ncu": "npm-check-updates"
   },
@@ -12,14 +12,15 @@
   "license": "MIT",
   "devDependencies": {
     "@types/node": "18.11.4",
-    "eslint": "8.24.0",
+    "eslint": "9.14.0",
     "nodemon": "2.0.20",
-    "npm-check-updates": "16.3.2"
+    "npm-check-updates": "16.3.2",
+    "vitest": "^2.1.5"
   },
   "dependencies": {
-    "@babel/core": "7.19.1",
-    "@babel/node": "7.19.1",
-    "@babel/preset-env": "7.19.1",
+    "@babel/core": "7.26.0",
+    "@babel/node": "7.26.0",
+    "@babel/preset-env": "7.26.0",
     "@types/ejs": "3.1.1",
     "@types/nodemailer": "6.4.6",
     "axios": "0.27.2",
