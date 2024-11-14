@@ -3,6 +3,8 @@ import { youtube_v3 } from 'googleapis'
 import { OAuth2Client } from 'google-auth-library'
 import { GaxiosResponse, GaxiosPromise, MethodOptions } from 'googleapis-common'
 
+import setupLogger from '../lib/logger'
+
 
 type SubscriptionsParams = youtube_v3.Params$Resource$Subscriptions$List
 type SubscriptionsResult = youtube_v3.Schema$SubscriptionListResponse
@@ -10,6 +12,12 @@ type SubscriptionsItem = youtube_v3.Schema$Subscription
 type SearchParams = youtube_v3.Params$Resource$Search$List
 type SearchResult = youtube_v3.Schema$SearchListResponse
 type SearchItem = youtube_v3.Schema$SearchResult
+type ChannelParams = youtube_v3.Params$Resource$Channels$List
+type ChannelResource = youtube_v3.Schema$ChannelListResponse
+type ChannelResult = youtube_v3.Schema$Channel
+
+type Resource = SubscriptionsItem | SearchItem | ChannelResource
+type Result = SubscriptionsResult | SearchResult | ChannelResult
 
 
 /**
@@ -33,21 +41,44 @@ function _genericIterator(
 	params: SearchParams,
 	options?: MethodOptions,
 ): AsyncIterable<Awaited<SearchItem>>
+function _genericIterator(
+	method: (
+		params?: ChannelParams,
+		options?: MethodOptions,
+	) => GaxiosPromise<ChannelResource>,
+	params: ChannelParams,
+	options?: MethodOptions,
+): AsyncIterable<Awaited<ChannelResult>>
 async function* _genericIterator(
 	method: (
 		params: SubscriptionsParams | SearchParams,
 		options?: MethodOptions,
-	) => GaxiosPromise<SubscriptionsResult | SearchResult>,
-	params: SubscriptionsParams | SearchParams,
+	) => GaxiosPromise<Result>,
+	params: SubscriptionsParams | SearchParams | ChannelParams,
 	options?: MethodOptions,
-): AsyncIterable<Awaited<SubscriptionsItem | SearchItem>> {
+): AsyncIterable<Awaited<Resource>> {
 	let nextPageToken = undefined
+
+	const logger = await setupLogger({ label: 'iterator' })
+	let itemsSeen = 0
 
 	do {
 
 		// Call given method with given params
-		const res: GaxiosResponse<SubscriptionsResult | SearchResult> =
+		const res: GaxiosResponse<Result> =
 			await method({ ...params, pageToken: nextPageToken }, options)
+
+		itemsSeen += res.data.items?.length ?? 0
+
+		logger.verbose('Got page of data', {
+			resultsPerPage: res.data.pageInfo?.resultsPerPage,
+			totalResults: res.data.pageInfo?.totalResults,
+			itemsSeen,
+			currentPageToken: nextPageToken,
+			nextPageToken: res.data.nextPageToken,
+		})
+
+		logger.debug(JSON.stringify({ options, res, nextPageToken }))
 
 		nextPageToken = res.data.nextPageToken
 
@@ -95,4 +126,16 @@ export const channelVideoIterator = (
 		part: ['id,snippet,contentDetails'],
 		maxResults: 50,
 		publishedAfter: dateFns.sub(new Date(), DATE_THRESHOLD).toISOString(),
+	})
+
+export const channelIterator = (
+	service: youtube_v3.Youtube,
+	auth: OAuth2Client,
+	channelIds: string[],
+) =>
+	_genericIterator(service.channels.list.bind(service), {
+		auth,
+		part: ['id,snippet'],
+		id: [channelIds[0]],
+		maxResults: 10,
 	})

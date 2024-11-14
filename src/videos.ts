@@ -203,12 +203,14 @@ export const parseFeedsAndNotify = async (
 		})
 
 		const channels: Channel[] = await db.all(SQL`
-			SELECT channelId, channelTitle, channelThumbnail FROM subscriptions;
+			SELECT channelId, channelTitle, channelThumbnail
+			FROM subscriptions
+			WHERE deleted=0;
 		`)
 
 		for (const [i, channel] of channels.entries()) {
 			logger.verbose([
-				`${i}/${channels.length}`,
+				`${i + 1}/${channels.length}`,
 				`Checking channel ${channel.channelTitle} (${channel.channelId})`,
 			].join(' '))
 			await getChannelsVideos({ channel, parser, logger, db, ...rest })
