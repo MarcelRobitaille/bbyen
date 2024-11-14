@@ -27,9 +27,17 @@ jobs:
           username: ${{ secrets.DOCKER_HUB_USERNAME }}
           password: ${{ secrets.DOCKER_HUB_PASSWORD }}
       - name: Publish to GitHub Packages
+        if: github.ref == 'refs/heads/master' # Run only on master
         uses: docker/build-push-action@v3
         with:
-          push: github.ref == 'refs/heads/master'
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+      - name: Publish to GitHub Packages (Dry Run)
+        if: github.ref != 'refs/heads/master' # Dry run if not master (push: false)
+        uses: docker/build-push-action@v3
+        with:
+          push: false
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
       - name: Update repo description
