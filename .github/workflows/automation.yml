@@ -27,10 +27,9 @@ jobs:
           username: ${{ secrets.DOCKER_HUB_USERNAME }}
           password: ${{ secrets.DOCKER_HUB_PASSWORD }}
       - name: Publish to GitHub Packages
-        if: github.ref == 'refs/heads/master' # Run only on master
         uses: docker/build-push-action@v3
         with:
-          push: true
+          push: github.ref == 'refs/heads/master'
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
       - name: Update repo description
