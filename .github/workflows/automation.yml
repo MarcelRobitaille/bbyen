@@ -21,27 +21,27 @@ jobs:
             type=ref,event=branch
             type=semver,pattern={{version}}
       - name: Login to Docker Hub
-        if: github.ref == 'refs/heads/master' # Run only on master
+        if: github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/tags/') # Run only on master
         uses: docker/login-action@v2
         with:
           username: ${{ secrets.DOCKER_HUB_USERNAME }}
           password: ${{ secrets.DOCKER_HUB_PASSWORD }}
       - name: Publish to GitHub Packages
-        if: github.ref == 'refs/heads/master' # Run only on master
+        if: github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/tags/') # Run only on master
         uses: docker/build-push-action@v3
         with:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
       - name: Publish to GitHub Packages (Dry Run)
-        if: github.ref != 'refs/heads/master' # Dry run if not master (push: false)
+        if: github.ref != 'refs/heads/master' && !startsWith(github.ref, 'refs/tags/') # Dry run if not master (push: false)
         uses: docker/build-push-action@v3
         with:
           push: false
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
       - name: Update repo description
-        if: github.ref == 'refs/heads/master' # Run only on master
+        if: github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/tags/') # Run only on master
         uses: peter-evans/dockerhub-description@v2
         with:
           repository: marcelrobitaille/bbyen
