@@ -23,7 +23,7 @@ It uses the [YouTube Data API](https://developers.google.com/youtube/v3/) to get
 
 or
 
-- [node.js](https://nodejs.org/en/) >= 14
+- [node.js](https://nodejs.org/en/) >= 16 (20 recommended)
 - [git](https://git-scm.com/) (used during setup to download the project)
 
 ## Installation and setup
