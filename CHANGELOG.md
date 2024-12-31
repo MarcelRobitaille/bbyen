@@ -1,5 +1,10 @@
 # Change Log
 
+## [3.0.1] 2024-12-31
+
+### Fixes
+- Fix regression that the process would exit when the email quota is up (#23)
+
 ## [3.0.0] 2024-11-18
 
 ### Breaking changes
