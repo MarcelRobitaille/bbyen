@@ -55,7 +55,7 @@ const getChannelsVideos = async ({
 	auth,
 	sendVideoEmail,
 	db,
-}: IGetChannelsVideos) => {
+}: IGetChannelsVideos): boolean => {
 	const { channelId, channelTitle, channelThumbnail } = channel
 
 	const videosSent = new Set((await db.all(SQL`
@@ -171,12 +171,14 @@ const getChannelsVideos = async ({
 					'Email quota has run out.',
 					'Abandoning, will retry on next timer trigger.',
 				)
-				process.exit(1)
+				return false;
 			}
 
 			logger.error(err)
 		}
 	}
+
+	return true;
 }
 
 interface IParseFeedsAndNotify {
@@ -213,7 +215,18 @@ export const parseFeedsAndNotify = async (
 				`${i + 1}/${channels.length}`,
 				`Checking channel ${channel.channelTitle} (${channel.channelId})`,
 			].join(' '))
-			await getChannelsVideos({ channel, parser, logger, db, ...rest })
+
+			const result = await getChannelsVideos({
+				channel,
+				parser,
+				logger,
+				db,
+				...rest
+			})
+
+			if (!result) {
+				return
+			}
 		}
 
 		logger.info('Finished checking for new videos')
