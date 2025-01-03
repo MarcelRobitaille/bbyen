@@ -4,6 +4,7 @@
 
 ### Fixes
 - Fix writing headers after sending response in authentication server.
+- Gracefully handle channel page giving 404 (instead of killing the process) (#22).
 
 ## [3.0.1] 2024-12-31
 

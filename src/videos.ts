@@ -55,17 +55,19 @@ const getChannelsVideos = async ({
 	auth,
 	sendVideoEmail,
 	db,
-}: IGetChannelsVideos): boolean => {
-	const { channelId, channelTitle, channelThumbnail } = channel
+}: IGetChannelsVideos): Promise<boolean> => {
+	const { channelId, channelThumbnail } = channel
 
 	const videosSent = new Set((await db.all(SQL`
 		SELECT videoId FROM videos WHERE channelId=${channelId};
 	`)).map(v => v.videoId))
 
-	const feed = await parser.parseURL([
-		'https://www.youtube.com/feeds/videos.xml',
-		'?channel_id=', channelId,
-	].join(''))
+	const url = `https://www.youtube.com/feeds/videos.xml?channel_id=${channelId}`
+	const feed = await parser.parseURL(url)
+		.catch((err) => {
+			logger.warn(`Error parsing videos from '${url}': ${err.message}`)
+			return { items: [] }
+		})
 
 	for (let { videoId } of feed.items) {
 		try {
