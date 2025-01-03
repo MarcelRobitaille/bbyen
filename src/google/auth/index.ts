@@ -74,13 +74,12 @@ const genAuthToken = async (oauth2Client: OAuth2Client) => {
 				try {
 					logger.info('Creating tokens from code')
 					const { tokens } = await oauth2Client.getToken(code)
-					res.end('Authorization successful. You may now close this tab.')
 					res.writeHead(200)
+						.end('Authorization successful. You may now close this tab.')
 					resolve(tokens)
 				} catch (err) {
 					console.error(err)
-					res.end(`Authorization failed. ${err}`)
-					res.writeHead(500)
+					res.writeHead(500).end(`Authorization failed. ${err}`)
 					reject(err)
 				}
 				server.close()
